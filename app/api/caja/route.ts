@@ -9,16 +9,23 @@ const supabase = createClient(
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const negocioId = searchParams.get('negocioId')
+  const desde     = searchParams.get('desde')
 
   if (!negocioId) return NextResponse.json({ error: 'negocioId requerido' }, { status: 400 })
 
-  const { data, error } = await supabase
-    .from('compras')
+  let query = supabase
+    .from('caja')
     .select('*')
     .eq('negocio_id', negocioId)
     .order('created_at', { ascending: false })
 
+  if (desde) query = query.gte('created_at', desde)
+
+  const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ compras: data })
+  const ingresos = data?.filter(m => m.tipo === 'ingreso').reduce((s, m) => s + m.monto, 0) ?? 0
+  const egresos  = data?.filter(m => m.tipo === 'egreso').reduce((s, m) => s + m.monto, 0) ?? 0
+
+  return NextResponse.json({ movimientos: data, ingresos, egresos, balance: ingresos - egresos })
 }
