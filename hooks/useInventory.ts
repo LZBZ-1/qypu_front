@@ -1,37 +1,39 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient'
-import { Product } from '../types/inventory'
+import { useEffect, useState } from 'react'
 
-const NEGOCIO_ID = process.env.NEXT_PUBLIC_NEGOCIO_ID ?? ''
+import { Product } from '@/types/inventory'
 
 export function useInventory() {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase
-        .from('inventario')
-        .select('*')
-        .eq('negocio_id', NEGOCIO_ID)
-        .order('nombre')
+    async function load() {
+      setIsLoading(true)
 
-      setProducts(data ?? [])
-      setIsLoading(false)
+      try {
+        const response = await fetch('/api/inventario')
+        const payload = await response.json()
+        setProducts(
+          (payload.items ?? []).map((item: any) => ({
+            id: item.productId,
+            negocio_id: payload.context?.organization?.id ?? '',
+            nombre: item.name,
+            cantidad: item.quantity,
+            precio_venta: item.unitPrice,
+            precio_costo: 0,
+            unidad: 'unidad',
+            stock_minimo: 0,
+            updated_at: item.updatedAt ?? new Date().toISOString(),
+          }))
+        )
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     load()
-
-    const channel = supabase
-      .channel('inventario-changes')
-      .on('postgres_changes' as any, {
-        event: '*', schema: 'public', table: 'inventario'
-      }, () => load())
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
   }, [])
 
   return { products, isLoading }

@@ -1,43 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createInventoryItem, getInventoryOverview } from '@/lib/appData'
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const negocioId = searchParams.get('negocioId')
+  void req
 
-  if (!negocioId) return NextResponse.json({ error: 'negocioId requerido' }, { status: 400 })
-
-  const { data, error } = await supabase
-    .from('inventario')
-    .select('*')
-    .eq('negocio_id', negocioId)
-    .order('nombre')
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  return NextResponse.json({ inventario: data })
+  try {
+    const data = await getInventoryOverview()
+    return NextResponse.json(data)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'No se pudo cargar inventario'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json()
-  const { negocio_id, nombre, cantidad, precio_venta, precio_costo, stock_minimo, unidad } = body
+  try {
+    const body = await req.json()
+    const { name, quantity, unitPrice, categoryId } = body
 
-  if (!negocio_id || !nombre) {
-    return NextResponse.json({ error: 'negocio_id y nombre son requeridos' }, { status: 400 })
+    if (!name || typeof name !== 'string') {
+      return NextResponse.json({ error: 'name es requerido' }, { status: 400 })
+    }
+
+    await createInventoryItem({
+      name,
+      quantity: typeof quantity === 'number' ? quantity : Number(quantity) || 0,
+      unitPrice: typeof unitPrice === 'number' ? unitPrice : Number(unitPrice) || 0,
+      categoryId: categoryId || null,
+    })
+
+    const data = await getInventoryOverview()
+    return NextResponse.json(data, { status: 201 })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'No se pudo crear el producto'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  const { data, error } = await supabase
-    .from('inventario')
-    .insert({ negocio_id, nombre, cantidad: cantidad ?? 0, precio_venta, precio_costo, stock_minimo: stock_minimo ?? 5, unidad: unidad ?? 'unidad' })
-    .select()
-    .single()
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  return NextResponse.json({ producto: data })
 }

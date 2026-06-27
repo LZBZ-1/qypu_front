@@ -1,72 +1,46 @@
-import { supabase } from '@/lib/supabaseClient'
-import { formatCurrency } from '@/lib/formatters'
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url)
+  const payload = await response.json()
+
+  if (!response.ok) {
+    throw new Error(payload.error ?? `Request failed for ${url}`)
+  }
+
+  return payload
+}
 
 export const insightsService = {
-  async getTodaySales(negocioId: string) {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+  async getTodaySales() {
+    const today = new Date().toISOString().slice(0, 10)
+    const data = await fetchJson<{
+      summary: { total: number; count: number }
+      rows: Array<{ id: string }>
+    }>(`/api/ventas?desde=${today}&hasta=${today}`)
 
-    const { data, error } = await supabase
-      .from('ventas')
-      .select('total, items, created_at')
-      .eq('negocio_id', negocioId)
-      .gte('created_at', today.toISOString())
-
-    if (error) throw error
-
-    const total = data?.reduce((sum, v) => sum + v.total, 0) ?? 0
-    return { total, count: data?.length ?? 0, raw: data ?? [] }
+    return { total: data.summary.total, count: data.summary.count, raw: data.rows }
   },
 
-  async getTopProducts(negocioId: string, limit = 5) {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+  async getTopProducts(limit = 5) {
+    const data = await fetchJson<{
+      topProducts: Array<{ name: string; quantity: number; income: number }>
+    }>('/api/reportes')
 
-    const { data } = await supabase
-      .from('ventas')
-      .select('items')
-      .eq('negocio_id', negocioId)
-      .gte('created_at', today.toISOString())
-
-    // Aplanar y agrupar items
-    const counts: Record<string, number> = {}
-    data?.forEach((venta) => {
-      venta.items?.forEach((item: any) => {
-        counts[item.nombre] = (counts[item.nombre] ?? 0) + item.qty
-      })
-    })
-
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, limit)
-      .map(([nombre, qty], i) => ({ id: String(i), name: nombre, qty }))
+    return data.topProducts.slice(0, limit).map((item, index) => ({
+      id: String(index),
+      name: item.name,
+      qty: item.quantity,
+    }))
   },
 
-  async getStockAlerts(negocioId: string) {
-    const { data } = await supabase
-      .from('inventario')
-      .select('id, nombre, cantidad, stock_minimo')
-      .eq('negocio_id', negocioId)
-      .filter('cantidad', 'lte', 'stock_minimo')
+  async getStockAlerts() {
+    const data = await fetchJson<{
+      items: Array<{ productId: string; name: string; quantity: number }>
+    }>('/api/inventario')
 
-    return data ?? []
+    return data.items.filter((item) => item.quantity === 0)
   },
 
-  async getCajaBalance(negocioId: string) {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const { data } = await supabase
-      .from('caja')
-      .select('tipo, monto')
-      .eq('negocio_id', negocioId)
-      .gte('created_at', today.toISOString())
-
-    const ingresos = data?.filter(m => m.tipo === 'ingreso')
-      .reduce((s, m) => s + m.monto, 0) ?? 0
-    const egresos = data?.filter(m => m.tipo === 'egreso')
-      .reduce((s, m) => s + m.monto, 0) ?? 0
-
-    return { ingresos, egresos, balance: ingresos - egresos }
-  }
+  async getCajaBalance() {
+    return fetchJson<{ ingresos: number; egresos: number; balance: number }>('/api/caja')
+  },
 }

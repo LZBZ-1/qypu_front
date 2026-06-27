@@ -1,24 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { getCashOverview } from '@/lib/appData'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const negocioId = searchParams.get('negocioId')
+  const desde = searchParams.get('desde') ?? undefined
 
-  if (!negocioId) return NextResponse.json({ error: 'negocioId requerido' }, { status: 400 })
+  try {
+    const data = await getCashOverview({ from: desde })
+    const compras = data.movimientos.filter((movement) => movement.type === 'egreso')
 
-  const { data, error } = await supabase
-    .from('compras')
-    .select('*')
-    .eq('negocio_id', negocioId)
-    .order('created_at', { ascending: false })
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  return NextResponse.json({ compras: data })
+    return NextResponse.json({
+      compras,
+      summary: {
+        total: compras.reduce((sum, movement) => sum + movement.amount, 0),
+        count: compras.length,
+        average: compras.length
+          ? compras.reduce((sum, movement) => sum + movement.amount, 0) / compras.length
+          : 0,
+        highest: compras.reduce((max, movement) => Math.max(max, movement.amount), 0),
+      },
+      note: 'El esquema actual no tiene una tabla de compras con proveedor e items. Esta vista muestra egresos de caja existentes.',
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'No se pudo cargar compras'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }

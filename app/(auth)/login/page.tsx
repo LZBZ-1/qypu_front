@@ -1,144 +1,207 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+
+type LoginState = {
+  email: string
+  password: string
+}
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const router = useRouter()
+  const [form, setForm] = useState<LoginState>({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  function update<K extends keyof LoginState>(key: K, value: LoginState[K]) {
+    setForm((current) => ({ ...current, [key]: value }))
+    setError('')
+  }
+
   async function handleLogin() {
-    if (!email || !password) { setError('Completa todos los campos'); return }
+    if (!form.email || !form.password) {
+      setError('Ingresa tu correo y contrasena.')
+      return
+    }
+
     setLoading(true)
     setError('')
+
     try {
-      // Aquí irá: await supabase.auth.signInWithPassword({ email, password })
-      await new Promise(r => setTimeout(r, 1200)) // simulación
-      window.location.href = '/dashboard'
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+
+      const payload = await response.json()
+
+      if (!response.ok) {
+        setError(payload.error ?? 'No se pudo iniciar sesion.')
+        return
+      }
+
+      router.replace(payload.nextStep ?? '/dashboard')
+      router.refresh()
     } catch {
-      setError('Correo o contraseña incorrectos')
+      setError('No se pudo iniciar sesion.')
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleGoogle() {
-    // Aquí irá: await supabase.auth.signInWithOAuth({ provider: 'google' })
-    alert('Login con Google — conecta Supabase para activarlo')
-  }
-
   return (
-    <div style={{ minHeight: '100vh', background: '#0F0F11', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ width: '100%', maxWidth: 400 }}>
+    <div style={shellStyle}>
+      <div style={{ width: '100%', maxWidth: 420 }}>
+        <Brand
+          title="Bienvenido a Qypu"
+          subtitle="Entra a tu cuenta y sigue el flujo de onboarding de tu negocio."
+        />
 
-        {/* Logo */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 14, background: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 22, color: '#fff', marginBottom: 14 }}>
-            Q
-          </div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: '#F4F4F5' }}>Bienvenido a Qypu</h1>
-          <p style={{ fontSize: 13, color: '#52525B', marginTop: 6, textAlign: 'center' }}>
-            Ingresa a tu cuenta para gestionar tu negocio
-          </p>
-        </div>
+        <div style={cardStyle}>
+          {error ? <Alert>{error}</Alert> : null}
 
-        {/* Card */}
-        <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 28, display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-          {/* Google */}
-          <button onClick={handleGoogle}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.04)', color: '#F4F4F5', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'background .15s' }}
-            onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-            onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}>
-            <svg width="18" height="18" viewBox="0 0 48 48">
-              <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/>
-              <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"/>
-              <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-2.9-11.3-7.2l-6.5 5C9.5 39.5 16.3 44 24 44z"/>
-              <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.9 2.5-2.6 4.6-4.8 6l6.2 5.2C40.5 36.2 44 30.5 44 24c0-1.3-.1-2.7-.4-4z"/>
-            </svg>
-            Continuar con Google
-          </button>
-
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-            <span style={{ fontSize: 11, color: '#52525B' }}>o con tu correo</span>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(244,63,94,0.08)', border: '1px solid rgba(244,63,94,0.2)', fontSize: 12, color: '#F87171' }}>
-              {error}
-            </div>
-          )}
-
-          {/* Email */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={{ fontSize: 12, color: '#71717A', fontWeight: 500 }}>Correo electrónico</label>
+          <Field label="Correo">
             <input
               type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleLogin()}
+              value={form.email}
+              onChange={(event) => update('email', event.target.value)}
+              onKeyDown={(event) => event.key === 'Enter' && handleLogin()}
               placeholder="tu@correo.com"
               style={inputStyle}
             />
-          </div>
+          </Field>
 
-          {/* Password */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label style={{ fontSize: 12, color: '#71717A', fontWeight: 500 }}>Contraseña</label>
-              <a href="#" style={{ fontSize: 11.5, color: '#A78BFA', textDecoration: 'none' }}>¿Olvidaste tu contraseña?</a>
-            </div>
+          <Field label="Contrasena">
             <input
               type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleLogin()}
-              placeholder="••••••••"
+              value={form.password}
+              onChange={(event) => update('password', event.target.value)}
+              onKeyDown={(event) => event.key === 'Enter' && handleLogin()}
+              placeholder="Minimo 6 caracteres"
               style={inputStyle}
             />
-          </div>
+          </Field>
 
-          {/* Submit */}
-          <button onClick={handleLogin} disabled={loading}
-            style={{ padding: '11px 16px', borderRadius: 10, background: loading ? '#5B21B6' : '#7C3AED', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, cursor: loading ? 'default' : 'pointer', transition: 'background .2s', marginTop: 4 }}>
+          <button onClick={handleLogin} disabled={loading} style={primaryButtonStyle(loading)}>
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
 
-          {/* Register link */}
-          <p style={{ fontSize: 12, color: '#52525B', textAlign: 'center', marginTop: 4 }}>
-            ¿No tienes cuenta?{' '}
-            <Link href="/register" style={{ color: '#A78BFA', fontWeight: 600, textDecoration: 'none' }}>
-              Regístrate gratis
+          <p style={footerTextStyle}>
+            Aun no tienes cuenta?{' '}
+            <Link href="/register" style={linkStyle}>
+              Registrate
             </Link>
           </p>
-
         </div>
-
-        {/* Footer */}
-        <p style={{ fontSize: 11, color: '#3F3F46', textAlign: 'center', marginTop: 20 }}>
-          Hecho en Perú 🇵🇪 para los que trabajan duro
-        </p>
-
       </div>
     </div>
   )
 }
 
+function Brand({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
+      <div style={logoStyle}>Q</div>
+      <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', color: '#F4F4F5' }}>{title}</h1>
+      <p style={{ fontSize: 13, color: '#71717A', marginTop: 8, textAlign: 'center', lineHeight: 1.6 }}>{subtitle}</p>
+    </div>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <label style={{ fontSize: 12, color: '#A1A1AA', fontWeight: 600 }}>{label}</label>
+      {children}
+    </div>
+  )
+}
+
+function Alert({ children }: { children: React.ReactNode }) {
+  return <div style={alertStyle}>{children}</div>
+}
+
+const shellStyle: React.CSSProperties = {
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 20,
+  background:
+    'radial-gradient(circle at top, rgba(34,197,94,0.18), transparent 28%), linear-gradient(180deg, #101316 0%, #090A0D 100%)',
+}
+
+const cardStyle: React.CSSProperties = {
+  background: 'rgba(17,24,39,0.88)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: 20,
+  padding: 28,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+  boxShadow: '0 24px 80px rgba(0,0,0,0.35)',
+}
+
+const logoStyle: React.CSSProperties = {
+  width: 52,
+  height: 52,
+  borderRadius: 16,
+  background: 'linear-gradient(135deg, #16A34A 0%, #22C55E 100%)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 900,
+  fontSize: 22,
+  color: '#04130A',
+  marginBottom: 14,
+}
+
 const inputStyle: React.CSSProperties = {
-  background: '#0A0A0D',
+  background: '#06080B',
   border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 8,
-  padding: '10px 12px',
-  fontSize: 13,
+  borderRadius: 10,
+  padding: '12px 14px',
+  fontSize: 14,
   color: '#F4F4F5',
   fontFamily: 'inherit',
   outline: 'none',
   width: '100%',
-  transition: 'border-color .2s',
+}
+
+const alertStyle: React.CSSProperties = {
+  padding: '10px 14px',
+  borderRadius: 10,
+  background: 'rgba(248,113,113,0.08)',
+  border: '1px solid rgba(248,113,113,0.22)',
+  fontSize: 12,
+  color: '#FCA5A5',
+}
+
+const footerTextStyle: React.CSSProperties = {
+  fontSize: 12,
+  color: '#71717A',
+  textAlign: 'center',
+  marginTop: 2,
+}
+
+const linkStyle: React.CSSProperties = {
+  color: '#86EFAC',
+  fontWeight: 700,
+  textDecoration: 'none',
+}
+
+function primaryButtonStyle(disabled: boolean): React.CSSProperties {
+  return {
+    padding: '12px 16px',
+    borderRadius: 10,
+    background: disabled ? '#166534' : '#16A34A',
+    border: 'none',
+    color: '#F0FDF4',
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: disabled ? 'default' : 'pointer',
+  }
 }

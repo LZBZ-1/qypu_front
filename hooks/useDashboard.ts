@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { insightsService } from '../services/insightsService'
-import { useSupabaseRealtime } from './useSupabaseRealtime'
+import { useEffect, useState } from 'react'
 
-const NEGOCIO_ID = process.env.NEXT_PUBLIC_NEGOCIO_ID ?? ''
+import { insightsService } from '@/services/insightsService'
+import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime'
 
 export function useDashboard() {
   const [todaySales, setTodaySales] = useState({ total: 0, count: 0 })
@@ -13,33 +12,36 @@ export function useDashboard() {
   const [aiInsight, setAiInsight] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const loadData = useCallback(async () => {
-    try {
-      const [sales, top, alerts, caja] = await Promise.all([
-        insightsService.getTodaySales(NEGOCIO_ID),
-        insightsService.getTopProducts(NEGOCIO_ID),
-        insightsService.getStockAlerts(NEGOCIO_ID),
-        insightsService.getCajaBalance(NEGOCIO_ID),
-      ])
-      setTodaySales({ total: sales.total, count: sales.count })
-      setTopProducts(top)
-      setStockAlerts(alerts)
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [sales, top, alerts] = await Promise.all([
+          insightsService.getTodaySales(),
+          insightsService.getTopProducts(),
+          insightsService.getStockAlerts(),
+        ])
 
-      if (alerts.length > 0) {
-        setAiInsight(`Tienes ${alerts.length} producto(s) con stock bajo. Considera reabastecer pronto.`)
-      } else if (sales.total > 0) {
-        setAiInsight(`Llevas S/ ${sales.total.toFixed(2)} en ventas hoy. ¡Vas bien! 💪`)
+        setTodaySales({ total: sales.total, count: sales.count })
+        setTopProducts(top)
+        setStockAlerts(alerts)
+
+        if (alerts.length > 0) {
+          setAiInsight(`Tienes ${alerts.length} producto(s) agotados. Conviene reponerlos.`)
+        } else if (sales.total > 0) {
+          setAiInsight(`Llevas S/ ${sales.total.toFixed(2)} en ventas hoy.`)
+        } else {
+          setAiInsight('Aun no hay ventas registradas hoy.')
+        }
+      } finally {
+        setIsLoading(false)
       }
-    } finally {
-      setIsLoading(false)
     }
+
+    loadData()
   }, [])
 
-  useEffect(() => { loadData() }, [loadData])
-
-  // Recargar cuando haya nuevas ventas en tiempo real
-  useSupabaseRealtime('ventas', () => loadData())
-  useSupabaseRealtime('inventario', () => loadData())
+  useSupabaseRealtime('sales', () => setIsLoading(false))
+  useSupabaseRealtime('product_stocks', () => setIsLoading(false))
 
   return { todaySales, topProducts, stockAlerts, aiInsight, isLoading }
 }

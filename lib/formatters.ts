@@ -15,3 +15,12 @@ export function formatDate(date: string): string {
     month: 'short',
   }).format(new Date(date))
 }
+
+export function formatDateTime(date: string): string {
+  return new Intl.DateTimeFormat('es-PE', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(date))
+}

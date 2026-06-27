@@ -1,165 +1,161 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
-const TIPOS = ['Bodega', 'Tienda', 'Restaurante', 'Farmacia', 'Otro']
+type RegisterState = {
+  name: string
+  lastName: string
+  phone: string
+  email: string
+  password: string
+}
 
 export default function RegisterPage() {
-  const [step, setStep] = useState<1 | 2>(1)
-  const [form, setForm] = useState({
-    nombre: '',
+  const router = useRouter()
+  const [form, setForm] = useState<RegisterState>({
+    name: '',
+    lastName: '',
+    phone: '',
     email: '',
     password: '',
-    negocio: '',
-    tipo: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  function update(key: string, value: string) {
-    setForm(prev => ({ ...prev, [key]: value }))
+  function update<K extends keyof RegisterState>(key: K, value: RegisterState[K]) {
+    setForm((current) => ({ ...current, [key]: value }))
     setError('')
-  }
-
-  function handleStep1() {
-    if (!form.nombre || !form.email || !form.password) {
-      setError('Completa todos los campos')
-      return
-    }
-    if (form.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
-      return
-    }
-    setStep(2)
   }
 
   async function handleRegister() {
-    if (!form.negocio || !form.tipo) {
-      setError('Completa el nombre y tipo de tu negocio')
+    if (!form.name || !form.lastName || !form.phone || !form.email || !form.password) {
+      setError('Completa todos los campos.')
       return
     }
+
+    if (form.password.length < 6) {
+      setError('La contrasena debe tener al menos 6 caracteres.')
+      return
+    }
+
     setLoading(true)
     setError('')
+
     try {
-      // Aquí irá:
-      // const { data, error } = await supabase.auth.signUp({ email: form.email, password: form.password })
-      // await supabase.from('negocios').insert({ user_id: data.user.id, nombre: form.negocio, tipo: form.tipo })
-      await new Promise(r => setTimeout(r, 1400)) // simulación
-      window.location.href = '/dashboard'
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+
+      const payload = await response.json()
+
+      if (!response.ok) {
+        setError(payload.error ?? 'No se pudo crear la cuenta.')
+        return
+      }
+
+      router.replace(payload.nextStep ?? '/onboarding/organization')
+      router.refresh()
     } catch {
-      setError('Hubo un problema. Intenta de nuevo.')
+      setError('No se pudo crear la cuenta.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0F0F11', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
+    <div style={shellStyle}>
+      <div style={{ width: '100%', maxWidth: 500 }}>
+        <div style={{ display: 'grid', gap: 28 }}>
+          <Brand
+            title="Crea tu cuenta"
+            subtitle="Primero tu acceso, luego onboarding de organizacion y al final la conexion con Telegram."
+          />
 
-        {/* Logo */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 14, background: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 22, color: '#fff', marginBottom: 14 }}>
-            Q
-          </div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: '#F4F4F5' }}>
-            {step === 1 ? 'Crea tu cuenta' : 'Cuéntanos de tu negocio'}
-          </h1>
-          <p style={{ fontSize: 13, color: '#52525B', marginTop: 6, textAlign: 'center' }}>
-            {step === 1 ? 'Gratis para siempre en el plan básico' : 'Último paso — promesa 🤙'}
-          </p>
-        </div>
+          <div style={cardStyle}>
+            {error ? <Alert>{error}</Alert> : null}
 
-        {/* Progress */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
-          {[1, 2].map(s => (
-            <div key={s} style={{ flex: 1, height: 3, borderRadius: 2, background: s <= step ? '#7C3AED' : 'rgba(255,255,255,0.08)', transition: 'background .3s' }} />
-          ))}
-        </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <Field label="Nombre">
+                <input
+                  value={form.name}
+                  onChange={(event) => update('name', event.target.value)}
+                  placeholder="Juan"
+                  style={inputStyle}
+                />
+              </Field>
 
-        {/* Card */}
-        <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 28, display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-          {/* Error */}
-          {error && (
-            <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(244,63,94,0.08)', border: '1px solid rgba(244,63,94,0.2)', fontSize: 12, color: '#F87171' }}>
-              {error}
+              <Field label="Apellido">
+                <input
+                  value={form.lastName}
+                  onChange={(event) => update('lastName', event.target.value)}
+                  placeholder="Perez"
+                  style={inputStyle}
+                />
+              </Field>
             </div>
-          )}
 
-          {/* STEP 1 */}
-          {step === 1 && (
-            <>
-              <Field label="Tu nombre">
-                <input value={form.nombre} onChange={e => update('nombre', e.target.value)} placeholder="Juan Pérez" style={inputStyle} />
-              </Field>
-              <Field label="Correo electrónico">
-                <input type="email" value={form.email} onChange={e => update('email', e.target.value)} placeholder="tu@correo.com" style={inputStyle} />
-              </Field>
-              <Field label="Contraseña">
-                <input type="password" value={form.password} onChange={e => update('password', e.target.value)} placeholder="Mínimo 6 caracteres" style={inputStyle} />
-              </Field>
-              <button onClick={handleStep1}
-                style={{ padding: '11px 16px', borderRadius: 10, background: '#7C3AED', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', marginTop: 4 }}>
-                Continuar →
-              </button>
-            </>
-          )}
-
-          {/* STEP 2 */}
-          {step === 2 && (
-            <>
-              <Field label="Nombre de tu negocio">
-                <input value={form.negocio} onChange={e => update('negocio', e.target.value)} placeholder="Ej: Bodega La Esperanza" style={inputStyle} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <Field label="Telefono">
+                <input
+                  value={form.phone}
+                  onChange={(event) => update('phone', event.target.value)}
+                  placeholder="+51 999 999 999"
+                  style={inputStyle}
+                />
               </Field>
 
-              <Field label="Tipo de negocio">
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginTop: 2 }}>
-                  {TIPOS.map(t => (
-                    <button key={t} onClick={() => update('tipo', t.toLowerCase())}
-                      style={{ padding: '9px 8px', borderRadius: 8, border: `1px solid ${form.tipo === t.toLowerCase() ? 'rgba(124,58,237,0.6)' : 'rgba(255,255,255,0.1)'}`, background: form.tipo === t.toLowerCase() ? 'rgba(124,58,237,0.15)' : 'transparent', color: form.tipo === t.toLowerCase() ? '#C4B5FD' : '#A1A1AA', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all .15s' }}>
-                      {t}
-                    </button>
-                  ))}
-                </div>
+              <Field label="Correo">
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(event) => update('email', event.target.value)}
+                  placeholder="tu@correo.com"
+                  style={inputStyle}
+                />
               </Field>
+            </div>
 
-              {/* Tip Telegram */}
-              <div style={{ padding: '12px 14px', background: 'rgba(34,158,217,0.07)', border: '1px solid rgba(34,158,217,0.15)', borderRadius: 10, fontSize: 12, color: '#60C8F5', lineHeight: 1.6 }}>
-                ✈️ Después de registrarte podrás conectar <strong>Telegram</strong> para gestionar tu negocio desde tu celular conversando con el bot.
-              </div>
+            <Field label="Contrasena">
+              <input
+                type="password"
+                value={form.password}
+                onChange={(event) => update('password', event.target.value)}
+                placeholder="Minimo 6 caracteres"
+                style={inputStyle}
+              />
+            </Field>
 
-              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                <button onClick={() => setStep(1)}
-                  style={{ flex: 1, padding: '11px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: '#A1A1AA', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-                  ← Atrás
-                </button>
-                <button onClick={handleRegister} disabled={loading}
-                  style={{ flex: 2, padding: '11px 16px', borderRadius: 10, background: loading ? '#5B21B6' : '#7C3AED', border: 'none', color: '#fff', fontSize: 14, fontWeight: 700, cursor: loading ? 'default' : 'pointer', transition: 'background .2s' }}>
-                  {loading ? 'Creando cuenta...' : 'Crear cuenta gratis 🚀'}
-                </button>
-              </div>
-            </>
-          )}
+            <div style={infoCardStyle}>
+              Apenas crees tu cuenta, te llevamos directo al onboarding de tu organizacion y al codigo para enlazar Telegram.
+            </div>
 
-          {/* Login link */}
-          {step === 1 && (
-            <p style={{ fontSize: 12, color: '#52525B', textAlign: 'center', marginTop: 4 }}>
-              ¿Ya tienes cuenta?{' '}
-              <Link href="/login" style={{ color: '#A78BFA', fontWeight: 600, textDecoration: 'none' }}>
-                Inicia sesión
+            <button onClick={handleRegister} disabled={loading} style={primaryButtonStyle(loading)}>
+              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+            </button>
+
+            <p style={footerTextStyle}>
+              Ya tienes cuenta?{' '}
+              <Link href="/login" style={linkStyle}>
+                Inicia sesion
               </Link>
             </p>
-          )}
-
+          </div>
         </div>
-
-        <p style={{ fontSize: 11, color: '#3F3F46', textAlign: 'center', marginTop: 20 }}>
-          Hecho en Perú 🇵🇪 para los que trabajan duro
-        </p>
-
       </div>
+    </div>
+  )
+}
+
+function Brand({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={logoStyle}>Q</div>
+      <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', color: '#F4F4F5' }}>{title}</h1>
+      <p style={{ fontSize: 13, color: '#A1A1AA', marginTop: 8, textAlign: 'center', lineHeight: 1.6, maxWidth: 420 }}>{subtitle}</p>
     </div>
   )
 }
@@ -167,20 +163,104 @@ export default function RegisterPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{ fontSize: 12, color: '#71717A', fontWeight: 500 }}>{label}</label>
+      <label style={{ fontSize: 12, color: '#D4D4D8', fontWeight: 600 }}>{label}</label>
       {children}
     </div>
   )
 }
 
+function Alert({ children }: { children: React.ReactNode }) {
+  return <div style={alertStyle}>{children}</div>
+}
+
+const shellStyle: React.CSSProperties = {
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 20,
+  background:
+    'radial-gradient(circle at top left, rgba(245,158,11,0.16), transparent 34%), linear-gradient(180deg, #14110D 0%, #080808 100%)',
+}
+
+const cardStyle: React.CSSProperties = {
+  background: 'rgba(24,24,27,0.92)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: 22,
+  padding: 28,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+  boxShadow: '0 26px 90px rgba(0,0,0,0.38)',
+}
+
+const logoStyle: React.CSSProperties = {
+  width: 56,
+  height: 56,
+  borderRadius: 18,
+  background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 900,
+  fontSize: 24,
+  color: '#1C1204',
+  marginBottom: 16,
+}
+
 const inputStyle: React.CSSProperties = {
-  background: '#0A0A0D',
+  background: '#09090B',
   border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 8,
-  padding: '10px 12px',
-  fontSize: 13,
+  borderRadius: 10,
+  padding: '12px 14px',
+  fontSize: 14,
   color: '#F4F4F5',
   fontFamily: 'inherit',
   outline: 'none',
   width: '100%',
+}
+
+const infoCardStyle: React.CSSProperties = {
+  padding: '12px 14px',
+  borderRadius: 12,
+  background: 'rgba(251,191,36,0.08)',
+  border: '1px solid rgba(251,191,36,0.22)',
+  color: '#FCD34D',
+  fontSize: 12.5,
+  lineHeight: 1.6,
+}
+
+const alertStyle: React.CSSProperties = {
+  padding: '10px 14px',
+  borderRadius: 10,
+  background: 'rgba(248,113,113,0.08)',
+  border: '1px solid rgba(248,113,113,0.22)',
+  fontSize: 12,
+  color: '#FCA5A5',
+}
+
+const footerTextStyle: React.CSSProperties = {
+  fontSize: 12,
+  color: '#71717A',
+  textAlign: 'center',
+  marginTop: 2,
+}
+
+const linkStyle: React.CSSProperties = {
+  color: '#FDBA74',
+  fontWeight: 700,
+  textDecoration: 'none',
+}
+
+function primaryButtonStyle(disabled: boolean): React.CSSProperties {
+  return {
+    padding: '12px 16px',
+    borderRadius: 10,
+    background: disabled ? '#C2410C' : '#EA580C',
+    border: 'none',
+    color: '#FFF7ED',
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: disabled ? 'default' : 'pointer',
+  }
 }
