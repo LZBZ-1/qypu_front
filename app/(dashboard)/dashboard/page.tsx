@@ -7,7 +7,6 @@ import CajaBalance    from '@/components/dashboard/CajaBalance'
 export default function DashboardPage() {
   return (
     <>
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em' }}>Dashboard</h1>
@@ -23,16 +22,13 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPIs */}
       <KpiGrid />
 
-      {/* Gráficos */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16 }}>
         <SalesChart />
         <DonutChart />
       </div>
 
-      {/* Tabla + Caja */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <InventoryTable />
         <CajaBalance />
