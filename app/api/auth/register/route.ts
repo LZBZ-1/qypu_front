@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { setSessionCookies, signInWithPassword } from '@/lib/auth'
+import { validateRegisterInput } from '@/lib/authValidation'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 type RegisterPayload = {
@@ -11,26 +12,16 @@ type RegisterPayload = {
   password?: string
 }
 
-function getText(value: unknown) {
-  return typeof value === 'string' ? value.trim() : ''
-}
-
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as RegisterPayload
-    const name = getText(body.name)
-    const lastName = getText(body.lastName)
-    const phone = getText(body.phone)
-    const email = getText(body.email).toLowerCase()
-    const password = getText(body.password)
+    const validation = validateRegisterInput(body)
 
-    if (!name || !lastName || !phone || !email || !password) {
-      return NextResponse.json({ error: 'Completa todos los campos.' }, { status: 400 })
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'La contrasena debe tener al menos 6 caracteres.' }, { status: 400 })
-    }
+    const { name, lastName, phone, email, password } = validation.data
 
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
