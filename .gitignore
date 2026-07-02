@@ -50,3 +50,5 @@ yarn-error.log*
 next-env.d.ts
 
 database.sql
+reset_database.sql
+recover_data_master.sql

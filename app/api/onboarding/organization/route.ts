@@ -7,11 +7,13 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 type OrganizationPayload = {
   organizationName?: string
   organizationAddress?: string
-  branchName?: string
   stateId?: string
   cityId?: string
   districtId?: string
 }
+
+const PRIMARY_BRANCH_NAME = 'SUCURSAL PRINCIPAL'
+const DEFAULT_PAYMENT_METHODS = ['Yape', 'Tarjetas', 'Transferencia', 'Plin', 'Efectivo'] as const
 
 function getText(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
@@ -63,12 +65,11 @@ export async function POST(request: Request) {
     const body = (await request.json()) as OrganizationPayload
     const organizationName = getText(body.organizationName)
     const organizationAddress = getText(body.organizationAddress)
-    const branchName = getText(body.branchName)
     const stateId = getText(body.stateId)
     const cityId = getText(body.cityId)
     const districtId = getText(body.districtId)
 
-    if (!organizationName || !organizationAddress || !branchName || !stateId || !cityId || !districtId) {
+    if (!organizationName || !organizationAddress || !stateId || !cityId || !districtId) {
       return NextResponse.json({ error: 'Completa los datos de tu organizacion.' }, { status: 400 })
     }
 
@@ -93,12 +94,26 @@ export async function POST(request: Request) {
       state_id: stateId,
       city_id: cityId,
       district_id: districtId,
-      name: branchName,
+      name: PRIMARY_BRANCH_NAME,
     })
 
     if (branchError) {
       await supabaseAdmin.from('organizations').delete().eq('id', organizationId)
       return NextResponse.json({ error: branchError.message }, { status: 400 })
+    }
+
+    const { error: paymentMethodsError } = await supabaseAdmin.from('payment_methods').insert(
+      DEFAULT_PAYMENT_METHODS.map((name) => ({
+        id: crypto.randomUUID(),
+        organization_id: organizationId,
+        name,
+      }))
+    )
+
+    if (paymentMethodsError) {
+      await supabaseAdmin.from('branches').delete().eq('id', branchId)
+      await supabaseAdmin.from('organizations').delete().eq('id', organizationId)
+      return NextResponse.json({ error: paymentMethodsError.message }, { status: 400 })
     }
 
     const { error: membershipError } = await supabaseAdmin.from('user_organizations').insert({
@@ -109,6 +124,7 @@ export async function POST(request: Request) {
     })
 
     if (membershipError) {
+      await supabaseAdmin.from('payment_methods').delete().eq('organization_id', organizationId)
       await supabaseAdmin.from('branches').delete().eq('id', branchId)
       await supabaseAdmin.from('organizations').delete().eq('id', organizationId)
       return NextResponse.json({ error: membershipError.message }, { status: 400 })
@@ -125,6 +141,7 @@ export async function POST(request: Request) {
 
     if (channelError) {
       await supabaseAdmin.from('user_organizations').delete().eq('id', membershipId)
+      await supabaseAdmin.from('payment_methods').delete().eq('organization_id', organizationId)
       await supabaseAdmin.from('branches').delete().eq('id', branchId)
       await supabaseAdmin.from('organizations').delete().eq('id', organizationId)
       return NextResponse.json({ error: channelError.message }, { status: 400 })

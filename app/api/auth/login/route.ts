@@ -2,26 +2,23 @@ import { NextResponse } from 'next/server'
 
 import { getPostAuthDestinationForUserId } from '@/lib/access'
 import { setSessionCookies, signInWithPassword } from '@/lib/auth'
+import { validateLoginInput } from '@/lib/authValidation'
 
 type LoginPayload = {
   email?: string
   password?: string
 }
 
-function getText(value: unknown) {
-  return typeof value === 'string' ? value.trim() : ''
-}
-
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as LoginPayload
-    const email = getText(body.email).toLowerCase()
-    const password = getText(body.password)
+    const validation = validateLoginInput(body)
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Ingresa tu correo y contrasena.' }, { status: 400 })
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
+    const { email, password } = validation.data
     const { data, error } = await signInWithPassword(email, password)
 
     if (error || !data.session) {

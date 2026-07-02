@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { AUTH_LIMITS, hasValidationErrors, validateRegisterFields, validateRegisterInput } from '@/lib/authValidation'
+
 type RegisterState = {
   name: string
   lastName: string
@@ -22,22 +24,26 @@ export default function RegisterPage() {
     email: '',
     password: '',
   })
+  const [touched, setTouched] = useState<Partial<Record<keyof RegisterState, boolean>>>({})
+  const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const fieldErrors = validateRegisterFields(form)
+  const formHasErrors = hasValidationErrors(fieldErrors)
 
   function update<K extends keyof RegisterState>(key: K, value: RegisterState[K]) {
     setForm((current) => ({ ...current, [key]: value }))
+    setTouched((current) => ({ ...current, [key]: true }))
     setError('')
   }
 
   async function handleRegister() {
-    if (!form.name || !form.lastName || !form.phone || !form.email || !form.password) {
-      setError('Completa todos los campos.')
-      return
-    }
+    setSubmitted(true)
 
-    if (form.password.length < 6) {
-      setError('La contrasena debe tener al menos 6 caracteres.')
+    const validation = validateRegisterInput(form)
+
+    if (!validation.ok) {
+      setError(validation.error)
       return
     }
 
@@ -85,8 +91,14 @@ export default function RegisterPage() {
                   value={form.name}
                   onChange={(event) => update('name', event.target.value)}
                   placeholder="Juan"
-                  style={inputStyle}
+                  autoComplete="given-name"
+                  required
+                  minLength={2}
+                  maxLength={AUTH_LIMITS.nameMax}
+                  aria-invalid={Boolean((touched.name || submitted) && fieldErrors.name)}
+                  style={inputStyle(Boolean((touched.name || submitted) && fieldErrors.name))}
                 />
+                <FieldError visible={Boolean(touched.name || submitted)} message={fieldErrors.name} />
               </Field>
 
               <Field label="Apellido">
@@ -94,8 +106,14 @@ export default function RegisterPage() {
                   value={form.lastName}
                   onChange={(event) => update('lastName', event.target.value)}
                   placeholder="Perez"
-                  style={inputStyle}
+                  autoComplete="family-name"
+                  required
+                  minLength={2}
+                  maxLength={AUTH_LIMITS.nameMax}
+                  aria-invalid={Boolean((touched.lastName || submitted) && fieldErrors.lastName)}
+                  style={inputStyle(Boolean((touched.lastName || submitted) && fieldErrors.lastName))}
                 />
+                <FieldError visible={Boolean(touched.lastName || submitted)} message={fieldErrors.lastName} />
               </Field>
             </div>
 
@@ -105,8 +123,14 @@ export default function RegisterPage() {
                   value={form.phone}
                   onChange={(event) => update('phone', event.target.value)}
                   placeholder="+51 999 999 999"
-                  style={inputStyle}
+                  autoComplete="tel"
+                  inputMode="tel"
+                  required
+                  maxLength={AUTH_LIMITS.phoneMax}
+                  aria-invalid={Boolean((touched.phone || submitted) && fieldErrors.phone)}
+                  style={inputStyle(Boolean((touched.phone || submitted) && fieldErrors.phone))}
                 />
+                <FieldError visible={Boolean(touched.phone || submitted)} message={fieldErrors.phone} />
               </Field>
 
               <Field label="Correo">
@@ -115,8 +139,13 @@ export default function RegisterPage() {
                   value={form.email}
                   onChange={(event) => update('email', event.target.value)}
                   placeholder="tu@correo.com"
-                  style={inputStyle}
+                  autoComplete="email"
+                  required
+                  maxLength={AUTH_LIMITS.emailMax}
+                  aria-invalid={Boolean((touched.email || submitted) && fieldErrors.email)}
+                  style={inputStyle(Boolean((touched.email || submitted) && fieldErrors.email))}
                 />
+                <FieldError visible={Boolean(touched.email || submitted)} message={fieldErrors.email} />
               </Field>
             </div>
 
@@ -126,15 +155,21 @@ export default function RegisterPage() {
                 value={form.password}
                 onChange={(event) => update('password', event.target.value)}
                 placeholder="Minimo 6 caracteres"
-                style={inputStyle}
+                autoComplete="new-password"
+                required
+                minLength={AUTH_LIMITS.passwordMin}
+                maxLength={AUTH_LIMITS.passwordMax}
+                aria-invalid={Boolean((touched.password || submitted) && fieldErrors.password)}
+                style={inputStyle(Boolean((touched.password || submitted) && fieldErrors.password))}
               />
+              <FieldError visible={Boolean(touched.password || submitted)} message={fieldErrors.password} />
             </Field>
 
             <div style={infoCardStyle}>
               Apenas crees tu cuenta, te llevamos directo al onboarding de tu organizacion y al codigo para enlazar Telegram.
             </div>
 
-            <button onClick={handleRegister} disabled={loading} style={primaryButtonStyle(loading)}>
+            <button onClick={handleRegister} disabled={loading || formHasErrors} style={primaryButtonStyle(loading || formHasErrors)}>
               {loading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
 
@@ -174,6 +209,10 @@ function Alert({ children }: { children: React.ReactNode }) {
   return <div style={alertStyle}>{children}</div>
 }
 
+function FieldError({ visible, message }: { visible: boolean; message?: string }) {
+  return visible && message ? <div style={fieldErrorStyle}>{message}</div> : null
+}
+
 const shellStyle: React.CSSProperties = {
   minHeight: '100vh',
   display: 'flex',
@@ -200,16 +239,18 @@ const logoImageStyle: React.CSSProperties = {
   marginBottom: 16,
 }
 
-const inputStyle: React.CSSProperties = {
-  background: '#F7FBFA',
-  border: '1px solid #B9DDD6',
-  borderRadius: 10,
-  padding: '12px 14px',
-  fontSize: 14,
-  color: '#061D33',
-  fontFamily: 'inherit',
-  outline: 'none',
-  width: '100%',
+function inputStyle(hasError = false): React.CSSProperties {
+  return {
+    background: '#F7FBFA',
+    border: hasError ? '1px solid #F87171' : '1px solid #B9DDD6',
+    borderRadius: 10,
+    padding: '12px 14px',
+    fontSize: 14,
+    color: '#061D33',
+    fontFamily: 'inherit',
+    outline: 'none',
+    width: '100%',
+  }
 }
 
 const infoCardStyle: React.CSSProperties = {
@@ -229,6 +270,12 @@ const alertStyle: React.CSSProperties = {
   border: '1px solid rgba(248,113,113,0.22)',
   fontSize: 12,
   color: '#B42318',
+}
+
+const fieldErrorStyle: React.CSSProperties = {
+  color: '#B42318',
+  fontSize: 11,
+  lineHeight: 1.4,
 }
 
 const footerTextStyle: React.CSSProperties = {

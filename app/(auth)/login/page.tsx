@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { AUTH_LIMITS, hasValidationErrors, validateLoginFields, validateLoginInput } from '@/lib/authValidation'
+
 type LoginState = {
   email: string
   password: string
@@ -13,17 +15,26 @@ type LoginState = {
 export default function LoginPage() {
   const router = useRouter()
   const [form, setForm] = useState<LoginState>({ email: '', password: '' })
+  const [touched, setTouched] = useState<Partial<Record<keyof LoginState, boolean>>>({})
+  const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const fieldErrors = validateLoginFields(form)
+  const formHasErrors = hasValidationErrors(fieldErrors)
 
   function update<K extends keyof LoginState>(key: K, value: LoginState[K]) {
     setForm((current) => ({ ...current, [key]: value }))
+    setTouched((current) => ({ ...current, [key]: true }))
     setError('')
   }
 
   async function handleLogin() {
-    if (!form.email || !form.password) {
-      setError('Ingresa tu correo y contrasena.')
+    setSubmitted(true)
+
+    const validation = validateLoginInput(form)
+
+    if (!validation.ok) {
+      setError(validation.error)
       return
     }
 
@@ -71,8 +82,13 @@ export default function LoginPage() {
               onChange={(event) => update('email', event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && handleLogin()}
               placeholder="tu@correo.com"
-              style={inputStyle}
+              autoComplete="email"
+              required
+              maxLength={AUTH_LIMITS.emailMax}
+              aria-invalid={Boolean((touched.email || submitted) && fieldErrors.email)}
+              style={inputStyle(Boolean((touched.email || submitted) && fieldErrors.email))}
             />
+            <FieldError visible={Boolean(touched.email || submitted)} message={fieldErrors.email} />
           </Field>
 
           <Field label="Contrasena">
@@ -82,11 +98,17 @@ export default function LoginPage() {
               onChange={(event) => update('password', event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && handleLogin()}
               placeholder="Minimo 6 caracteres"
-              style={inputStyle}
+              autoComplete="current-password"
+              required
+              minLength={AUTH_LIMITS.passwordMin}
+              maxLength={AUTH_LIMITS.passwordMax}
+              aria-invalid={Boolean((touched.password || submitted) && fieldErrors.password)}
+              style={inputStyle(Boolean((touched.password || submitted) && fieldErrors.password))}
             />
+            <FieldError visible={Boolean(touched.password || submitted)} message={fieldErrors.password} />
           </Field>
 
-          <button onClick={handleLogin} disabled={loading} style={primaryButtonStyle(loading)}>
+          <button onClick={handleLogin} disabled={loading || formHasErrors} style={primaryButtonStyle(loading || formHasErrors)}>
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
 
@@ -125,6 +147,10 @@ function Alert({ children }: { children: React.ReactNode }) {
   return <div style={alertStyle}>{children}</div>
 }
 
+function FieldError({ visible, message }: { visible: boolean; message?: string }) {
+  return visible && message ? <div style={fieldErrorStyle}>{message}</div> : null
+}
+
 const shellStyle: React.CSSProperties = {
   minHeight: '100vh',
   display: 'flex',
@@ -151,16 +177,18 @@ const logoImageStyle: React.CSSProperties = {
   marginBottom: 16,
 }
 
-const inputStyle: React.CSSProperties = {
-  background: '#F7FBFA',
-  border: '1px solid #B9DDD6',
-  borderRadius: 10,
-  padding: '12px 14px',
-  fontSize: 14,
-  color: '#061D33',
-  fontFamily: 'inherit',
-  outline: 'none',
-  width: '100%',
+function inputStyle(hasError = false): React.CSSProperties {
+  return {
+    background: '#F7FBFA',
+    border: hasError ? '1px solid #F87171' : '1px solid #B9DDD6',
+    borderRadius: 10,
+    padding: '12px 14px',
+    fontSize: 14,
+    color: '#061D33',
+    fontFamily: 'inherit',
+    outline: 'none',
+    width: '100%',
+  }
 }
 
 const alertStyle: React.CSSProperties = {
@@ -170,6 +198,12 @@ const alertStyle: React.CSSProperties = {
   border: '1px solid rgba(248,113,113,0.22)',
   fontSize: 12,
   color: '#B42318',
+}
+
+const fieldErrorStyle: React.CSSProperties = {
+  color: '#B42318',
+  fontSize: 11,
+  lineHeight: 1.4,
 }
 
 const footerTextStyle: React.CSSProperties = {

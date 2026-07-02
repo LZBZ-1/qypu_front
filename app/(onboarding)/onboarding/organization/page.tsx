@@ -28,7 +28,6 @@ type BootstrapResponse = {
 type FormState = {
   organizationName: string
   organizationAddress: string
-  branchName: string
   stateId: string
   cityId: string
   districtId: string
@@ -43,7 +42,6 @@ export default function OrganizationOnboardingPage() {
   const [form, setForm] = useState<FormState>({
     organizationName: '',
     organizationAddress: '',
-    branchName: '',
     stateId: '',
     cityId: '',
     districtId: '',
@@ -78,12 +76,6 @@ export default function OrganizationOnboardingPage() {
         ...current,
         organizationName: config?.keepState ? current.organizationName : current.organizationName,
         organizationAddress: config?.keepState ? current.organizationAddress : current.organizationAddress,
-        branchName:
-          config?.keepState || current.branchName
-            ? current.branchName
-            : payload.profile
-              ? `Principal ${payload.profile.name}`
-              : '',
         cityId:
           payload.cities.some((city) => city.id === current.cityId) && config?.keepState ? current.cityId : '',
         districtId:
@@ -132,7 +124,7 @@ export default function OrganizationOnboardingPage() {
   }
 
   async function handleSubmit() {
-    if (!form.organizationName || !form.organizationAddress || !form.branchName || !form.stateId || !form.cityId || !form.districtId) {
+    if (!form.organizationName || !form.organizationAddress || !form.stateId || !form.cityId || !form.districtId) {
       setError('Completa todos los datos de la organizacion.')
       return
     }
@@ -190,14 +182,6 @@ export default function OrganizationOnboardingPage() {
                       value={form.organizationName}
                       onChange={(event) => update('organizationName', event.target.value)}
                       placeholder="Qypu Market"
-                      style={inputStyle}
-                    />
-                  </Field>
-                  <Field label="Sucursal principal">
-                    <input
-                      value={form.branchName}
-                      onChange={(event) => update('branchName', event.target.value)}
-                      placeholder="Casa matriz"
                       style={inputStyle}
                     />
                   </Field>
