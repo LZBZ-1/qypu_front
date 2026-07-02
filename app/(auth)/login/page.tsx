@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -104,9 +105,9 @@ export default function LoginPage() {
 function Brand({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
-      <div style={logoStyle}>Q</div>
-      <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', color: '#F4F4F5' }}>{title}</h1>
-      <p style={{ fontSize: 13, color: '#71717A', marginTop: 8, textAlign: 'center', lineHeight: 1.6 }}>{subtitle}</p>
+      <Image src="/images/logo.png" alt="Qypu" width={156} height={60} priority style={logoImageStyle} />
+      <h1 style={{ fontSize: 24, fontWeight: 800, color: '#062342' }}>{title}</h1>
+      <p style={{ fontSize: 13, color: '#45677B', marginTop: 8, textAlign: 'center', lineHeight: 1.6 }}>{subtitle}</p>
     </div>
   )
 }
@@ -114,7 +115,7 @@ function Brand({ title, subtitle }: { title: string; subtitle: string }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{ fontSize: 12, color: '#A1A1AA', fontWeight: 600 }}>{label}</label>
+      <label style={{ fontSize: 12, color: '#34566C', fontWeight: 700 }}>{label}</label>
       {children}
     </div>
   )
@@ -130,42 +131,33 @@ const shellStyle: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   padding: 20,
-  background:
-    'radial-gradient(circle at top, rgba(34,197,94,0.18), transparent 28%), linear-gradient(180deg, #101316 0%, #090A0D 100%)',
+  background: 'linear-gradient(180deg, #FFFFFF 0%, #EEFaf7 100%)',
 }
 
 const cardStyle: React.CSSProperties = {
-  background: 'rgba(17,24,39,0.88)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 20,
+  background: '#FFFFFF',
+  border: '1px solid #DCEFEB',
+  borderRadius: 14,
   padding: 28,
   display: 'flex',
   flexDirection: 'column',
   gap: 16,
-  boxShadow: '0 24px 80px rgba(0,0,0,0.35)',
+  boxShadow: '0 18px 44px rgba(6,35,66,0.10)',
 }
 
-const logoStyle: React.CSSProperties = {
-  width: 52,
-  height: 52,
-  borderRadius: 16,
-  background: 'linear-gradient(135deg, #16A34A 0%, #22C55E 100%)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontWeight: 900,
-  fontSize: 22,
-  color: '#04130A',
-  marginBottom: 14,
+const logoImageStyle: React.CSSProperties = {
+  width: 156,
+  height: 'auto',
+  marginBottom: 16,
 }
 
 const inputStyle: React.CSSProperties = {
-  background: '#06080B',
-  border: '1px solid rgba(255,255,255,0.1)',
+  background: '#F7FBFA',
+  border: '1px solid #B9DDD6',
   borderRadius: 10,
   padding: '12px 14px',
   fontSize: 14,
-  color: '#F4F4F5',
+  color: '#061D33',
   fontFamily: 'inherit',
   outline: 'none',
   width: '100%',
@@ -177,18 +169,18 @@ const alertStyle: React.CSSProperties = {
   background: 'rgba(248,113,113,0.08)',
   border: '1px solid rgba(248,113,113,0.22)',
   fontSize: 12,
-  color: '#FCA5A5',
+  color: '#B42318',
 }
 
 const footerTextStyle: React.CSSProperties = {
   fontSize: 12,
-  color: '#71717A',
+  color: '#45677B',
   textAlign: 'center',
   marginTop: 2,
 }
 
 const linkStyle: React.CSSProperties = {
-  color: '#86EFAC',
+  color: '#008772',
   fontWeight: 700,
   textDecoration: 'none',
 }
@@ -197,9 +189,9 @@ function primaryButtonStyle(disabled: boolean): React.CSSProperties {
   return {
     padding: '12px 16px',
     borderRadius: 10,
-    background: disabled ? '#166534' : '#16A34A',
+    background: disabled ? '#7CBFB0' : '#00A884',
     border: 'none',
-    color: '#F0FDF4',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 700,
     cursor: disabled ? 'default' : 'pointer',

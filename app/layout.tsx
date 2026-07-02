@@ -13,16 +13,14 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Qypu — Gestión para tu negocio',
+  title: 'Qypu - Gestion para tu negocio',
   description: 'Gestiona tu bodega o tienda conversando con Qypu',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body style={{ margin: 0, padding: 0, background: '#0F0F11', minHeight: '100vh' }}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

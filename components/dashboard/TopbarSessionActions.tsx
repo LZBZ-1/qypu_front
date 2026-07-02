@@ -20,16 +20,16 @@ export default function TopbarSessionActions({ initials }: { initials: string })
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+    <div className="flex items-center gap-2">
       <button
         onClick={handleLogout}
         disabled={loading}
-        style={{ padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: '#D4D4D8', fontSize: 12, fontWeight: 700, cursor: loading ? 'default' : 'pointer' }}
+        className="min-h-10 rounded-full border border-[#b9ddd6] bg-white px-3 text-xs font-bold text-[#063052] shadow-sm disabled:cursor-default disabled:opacity-70 sm:px-4"
       >
-        {loading ? 'Saliendo...' : 'Cerrar sesion'}
+        {loading ? 'Saliendo...' : 'Salir'}
       </button>
 
-      <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#3F3F46', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#D4D4D8' }}>
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e0f7f1] text-xs font-black text-[#008772]">
         {initials}
       </div>
     </div>

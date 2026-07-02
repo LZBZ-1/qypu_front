@@ -165,14 +165,14 @@ export default function OrganizationOnboardingPage() {
 
   return (
     <div style={shellStyle}>
-      <div style={{ width: '100%', maxWidth: 760 }}>
+      <div style={{ width: '100%', maxWidth: 960, margin: '0 auto' }}>
         <div style={{ display: 'grid', gap: 24 }}>
           <header style={{ display: 'grid', gap: 10 }}>
             <div style={eyebrowStyle}>Paso 1 de 2</div>
-            <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.04em', color: '#F4F4F5', margin: 0 }}>
+            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#062342', margin: 0 }}>
               Onboarding de organizacion
             </h1>
-            <p style={{ margin: 0, maxWidth: 560, color: '#CBD5E1', lineHeight: 1.7, fontSize: 14 }}>
+            <p style={{ margin: 0, maxWidth: 560, color: '#45677B', lineHeight: 1.7, fontSize: 14 }}>
               Creamos tu organizacion, tu sucursal principal y dejamos listo el canal base para Telegram.
             </p>
           </header>
@@ -184,7 +184,7 @@ export default function OrganizationOnboardingPage() {
               <div style={{ color: '#A1A1AA', fontSize: 13 }}>Cargando catalogos de ubicacion...</div>
             ) : (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 18 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18 }}>
                   <Field label="Nombre de la organizacion">
                     <input
                       value={form.organizationName}
@@ -212,7 +212,7 @@ export default function OrganizationOnboardingPage() {
                   />
                 </Field>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 18 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 18 }}>
                   <Field label="Departamento">
                     <select value={form.stateId} onChange={(event) => update('stateId', event.target.value)} style={inputStyle}>
                       <option value="">Selecciona</option>
@@ -271,7 +271,7 @@ export default function OrganizationOnboardingPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <label style={{ fontSize: 12, color: '#D4D4D8', fontWeight: 600 }}>{label}</label>
+      <label style={{ fontSize: 12, color: '#34566C', fontWeight: 700 }}>{label}</label>
       {children}
     </div>
   )
@@ -284,19 +284,20 @@ function Alert({ children }: { children: React.ReactNode }) {
 const shellStyle: React.CSSProperties = {
   minHeight: '100vh',
   padding: '48px 20px',
-  background:
-    'radial-gradient(circle at top right, rgba(14,165,233,0.16), transparent 26%), linear-gradient(180deg, #09131B 0%, #05070A 100%)',
+  display: 'grid',
+  alignItems: 'center',
+  background: 'linear-gradient(180deg, #FFFFFF 0%, #EEFaf7 100%)',
 }
 
 const eyebrowStyle: React.CSSProperties = {
   width: 'fit-content',
   padding: '6px 10px',
   borderRadius: 999,
-  background: 'rgba(14,165,233,0.12)',
-  border: '1px solid rgba(56,189,248,0.22)',
+  background: '#E0F7F1',
+  border: '1px solid #B9DDD6',
   fontSize: 11,
   fontWeight: 700,
-  color: '#7DD3FC',
+  color: '#008772',
   letterSpacing: '.08em',
   textTransform: 'uppercase',
 }
@@ -304,20 +305,20 @@ const eyebrowStyle: React.CSSProperties = {
 const cardStyle: React.CSSProperties = {
   display: 'grid',
   gap: 18,
-  background: 'rgba(15,23,42,0.86)',
-  border: '1px solid rgba(148,163,184,0.14)',
-  borderRadius: 24,
+  background: '#FFFFFF',
+  border: '1px solid #DCEFEB',
+  borderRadius: 14,
   padding: 28,
-  boxShadow: '0 24px 80px rgba(2,6,23,0.45)',
+  boxShadow: '0 18px 44px rgba(6,35,66,0.10)',
 }
 
 const inputStyle: React.CSSProperties = {
-  background: '#020617',
-  border: '1px solid rgba(148,163,184,0.2)',
+  background: '#F7FBFA',
+  border: '1px solid #B9DDD6',
   borderRadius: 12,
   padding: '12px 14px',
   fontSize: 14,
-  color: '#F8FAFC',
+  color: '#061D33',
   fontFamily: 'inherit',
   width: '100%',
 }
@@ -325,9 +326,9 @@ const inputStyle: React.CSSProperties = {
 const noteStyle: React.CSSProperties = {
   padding: '14px 16px',
   borderRadius: 14,
-  background: 'rgba(14,165,233,0.08)',
-  border: '1px solid rgba(56,189,248,0.22)',
-  color: '#BAE6FD',
+  background: '#EEFaf7',
+  border: '1px solid #B9DDD6',
+  color: '#34566C',
   fontSize: 12.5,
   lineHeight: 1.6,
 }
@@ -337,7 +338,7 @@ const alertStyle: React.CSSProperties = {
   borderRadius: 12,
   background: 'rgba(248,113,113,0.08)',
   border: '1px solid rgba(248,113,113,0.22)',
-  color: '#FCA5A5',
+  color: '#B42318',
   fontSize: 12,
 }
 
@@ -345,9 +346,9 @@ function primaryButtonStyle(disabled: boolean): React.CSSProperties {
   return {
     padding: '13px 18px',
     borderRadius: 12,
-    background: disabled ? '#0369A1' : '#0EA5E9',
+    background: disabled ? '#7CBFB0' : '#00A884',
     border: 'none',
-    color: '#082F49',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 800,
     cursor: disabled ? 'default' : 'pointer',

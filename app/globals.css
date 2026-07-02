@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7fbfa;
+  --foreground: #061d33;
 }
 
 @theme inline {
@@ -12,15 +12,102 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.qypu-chat-carousel,
+.qypu-chat-body-carousel {
+  display: grid;
+  overflow: hidden;
+}
+
+.qypu-chat-slide,
+.qypu-chat-body-slide {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateX(18px);
+  animation: qypu-chat-slide 8s ease-in-out infinite;
+}
+
+.qypu-chat-slide-telegram {
+  background: #229ed9;
+}
+
+.qypu-chat-slide-whatsapp {
+  background: #00a884;
+}
+
+.qypu-chat-slide-whatsapp,
+.qypu-chat-body-slide:nth-child(2) {
+  animation-delay: 4s;
+}
+
+@keyframes qypu-chat-slide {
+  0%,
+  43% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  50%,
+  93% {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+
+  94%,
+  100% {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+[data-app-shell="dashboard"] table {
+  min-width: 640px;
+}
+
+[data-app-shell="dashboard"] [style*="background: #18181B"],
+[data-app-shell="dashboard"] [style*="background: #0A0A0D"],
+[data-app-shell="dashboard"] [style*="background: rgba(24,24,27"],
+[data-app-shell="dashboard"] [style*="background: rgba(15,23,42"] {
+  background: #ffffff !important;
+  border-color: #dcefeb !important;
+  box-shadow: 0 10px 28px rgba(6, 35, 66, 0.06) !important;
+}
+
+[data-app-shell="dashboard"] [style*="color: #F4F4F5"],
+[data-app-shell="dashboard"] [style*="color: #D4D4D8"],
+[data-app-shell="dashboard"] [style*="color: #A1A1AA"] {
+  color: #34566c !important;
+}
+
+[data-app-shell="dashboard"] h1,
+[data-app-shell="dashboard"] [style*="font-weight: 800"] {
+  color: #062342;
+}
+
+@media (max-width: 900px) {
+  [data-app-shell="dashboard"] [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  [data-app-shell="dashboard"] [style*="align-items: flex-end"] {
+    align-items: flex-start !important;
+  }
 }

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 
 import { getAccessState } from '@/lib/access'
 import TopbarSessionActions from '@/components/dashboard/TopbarSessionActions'
@@ -18,21 +19,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const initials = `${access.profile?.name?.[0] ?? 'Q'}${access.profile?.last_name?.[0] ?? 'Y'}`.toUpperCase()
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gridTemplateRows: '52px 1fr', minHeight: '100vh', background: '#0F0F11', color: '#F4F4F5' }}>
-      <header style={{ gridColumn: '1/-1', display: 'flex', alignItems: 'center', padding: '0 20px', gap: '14px', background: '#0A0A0D', borderBottom: '1px solid rgba(255,255,255,0.07)', position: 'sticky', top: 0, zIndex: 10 }}>
-        <div style={{ width: 30, height: 30, borderRadius: 8, background: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, color: '#fff', flexShrink: 0 }}>
-          Q
-        </div>
-        <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-0.02em' }}>Qypu</span>
+    <div
+      data-app-shell="dashboard"
+      className="grid min-h-screen grid-rows-[auto_auto_1fr] bg-[#f7fbfa] text-[#061d33] lg:grid-cols-[220px_1fr] lg:grid-rows-[64px_1fr]"
+    >
+      <header className="sticky top-0 z-20 col-span-full flex items-center gap-4 border-b border-[#dcefeb] bg-white/95 px-4 py-3 backdrop-blur sm:px-5 lg:py-0">
+        <Image src="/images/logo.png" alt="Qypu" width={118} height={46} className="h-10 w-auto" priority />
 
-        <div style={{ marginLeft: 'auto' }}>
+        <div className="ml-auto">
           <TopbarSessionActions initials={initials} />
         </div>
       </header>
 
       <Sidebar />
 
-      <main style={{ padding: 24, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <main className="flex min-w-0 flex-col gap-5 overflow-x-auto px-4 py-5 sm:px-6 lg:px-7">
         {children}
       </main>
     </div>

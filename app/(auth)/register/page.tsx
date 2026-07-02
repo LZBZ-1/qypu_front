@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -78,7 +79,7 @@ export default function RegisterPage() {
           <div style={cardStyle}>
             {error ? <Alert>{error}</Alert> : null}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
               <Field label="Nombre">
                 <input
                   value={form.name}
@@ -98,7 +99,7 @@ export default function RegisterPage() {
               </Field>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
               <Field label="Telefono">
                 <input
                   value={form.phone}
@@ -153,9 +154,9 @@ export default function RegisterPage() {
 function Brand({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div style={logoStyle}>Q</div>
-      <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', color: '#F4F4F5' }}>{title}</h1>
-      <p style={{ fontSize: 13, color: '#A1A1AA', marginTop: 8, textAlign: 'center', lineHeight: 1.6, maxWidth: 420 }}>{subtitle}</p>
+      <Image src="/images/logo.png" alt="Qypu" width={156} height={60} priority style={logoImageStyle} />
+      <h1 style={{ fontSize: 24, fontWeight: 800, color: '#062342' }}>{title}</h1>
+      <p style={{ fontSize: 13, color: '#45677B', marginTop: 8, textAlign: 'center', lineHeight: 1.6, maxWidth: 420 }}>{subtitle}</p>
     </div>
   )
 }
@@ -163,7 +164,7 @@ function Brand({ title, subtitle }: { title: string; subtitle: string }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{ fontSize: 12, color: '#D4D4D8', fontWeight: 600 }}>{label}</label>
+      <label style={{ fontSize: 12, color: '#34566C', fontWeight: 700 }}>{label}</label>
       {children}
     </div>
   )
@@ -179,42 +180,33 @@ const shellStyle: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   padding: 20,
-  background:
-    'radial-gradient(circle at top left, rgba(245,158,11,0.16), transparent 34%), linear-gradient(180deg, #14110D 0%, #080808 100%)',
+  background: 'linear-gradient(180deg, #FFFFFF 0%, #EEFaf7 100%)',
 }
 
 const cardStyle: React.CSSProperties = {
-  background: 'rgba(24,24,27,0.92)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 22,
+  background: '#FFFFFF',
+  border: '1px solid #DCEFEB',
+  borderRadius: 14,
   padding: 28,
   display: 'flex',
   flexDirection: 'column',
   gap: 16,
-  boxShadow: '0 26px 90px rgba(0,0,0,0.38)',
+  boxShadow: '0 18px 44px rgba(6,35,66,0.10)',
 }
 
-const logoStyle: React.CSSProperties = {
-  width: 56,
-  height: 56,
-  borderRadius: 18,
-  background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontWeight: 900,
-  fontSize: 24,
-  color: '#1C1204',
+const logoImageStyle: React.CSSProperties = {
+  width: 156,
+  height: 'auto',
   marginBottom: 16,
 }
 
 const inputStyle: React.CSSProperties = {
-  background: '#09090B',
-  border: '1px solid rgba(255,255,255,0.1)',
+  background: '#F7FBFA',
+  border: '1px solid #B9DDD6',
   borderRadius: 10,
   padding: '12px 14px',
   fontSize: 14,
-  color: '#F4F4F5',
+  color: '#061D33',
   fontFamily: 'inherit',
   outline: 'none',
   width: '100%',
@@ -223,9 +215,9 @@ const inputStyle: React.CSSProperties = {
 const infoCardStyle: React.CSSProperties = {
   padding: '12px 14px',
   borderRadius: 12,
-  background: 'rgba(251,191,36,0.08)',
-  border: '1px solid rgba(251,191,36,0.22)',
-  color: '#FCD34D',
+  background: '#EEFaf7',
+  border: '1px solid #B9DDD6',
+  color: '#34566C',
   fontSize: 12.5,
   lineHeight: 1.6,
 }
@@ -236,18 +228,18 @@ const alertStyle: React.CSSProperties = {
   background: 'rgba(248,113,113,0.08)',
   border: '1px solid rgba(248,113,113,0.22)',
   fontSize: 12,
-  color: '#FCA5A5',
+  color: '#B42318',
 }
 
 const footerTextStyle: React.CSSProperties = {
   fontSize: 12,
-  color: '#71717A',
+  color: '#45677B',
   textAlign: 'center',
   marginTop: 2,
 }
 
 const linkStyle: React.CSSProperties = {
-  color: '#FDBA74',
+  color: '#008772',
   fontWeight: 700,
   textDecoration: 'none',
 }
@@ -256,9 +248,9 @@ function primaryButtonStyle(disabled: boolean): React.CSSProperties {
   return {
     padding: '12px 16px',
     borderRadius: 10,
-    background: disabled ? '#C2410C' : '#EA580C',
+    background: disabled ? '#7CBFB0' : '#00A884',
     border: 'none',
-    color: '#FFF7ED',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 700,
     cursor: disabled ? 'default' : 'pointer',

@@ -21,21 +21,25 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside style={{ background: '#0A0A0D', borderRight: '1px solid rgba(255,255,255,0.07)', padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: 2, position: 'sticky', top: 52, height: 'calc(100vh - 52px)', overflowY: 'auto' }}>
-      <SectionLabel>Principal</SectionLabel>
-      {NAV.map((item) => <NavItem key={item.href} {...item} active={pathname === item.href} />)}
+    <aside className="border-b border-[#dcefeb] bg-white px-4 py-3 lg:sticky lg:top-16 lg:h-[calc(100vh-64px)] lg:border-b-0 lg:border-r lg:px-3 lg:py-4">
+      <nav className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
+        <SectionLabel>Principal</SectionLabel>
+        {NAV.map((item) => (
+          <NavItem key={item.href} {...item} active={pathname === item.href} />
+        ))}
 
-      <SectionLabel style={{ marginTop: 8 }}>Configuracion</SectionLabel>
-      {NAV_CONFIG.map((item) => <NavItem key={item.href} {...item} active={pathname === item.href} />)}
-
-      <div style={{ flex: 1 }} />
+        <SectionLabel className="lg:mt-3">Configuracion</SectionLabel>
+        {NAV_CONFIG.map((item) => (
+          <NavItem key={item.href} {...item} active={pathname === item.href} />
+        ))}
+      </nav>
     </aside>
   )
 }
 
-function SectionLabel({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+function SectionLabel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div style={{ fontSize: 9.5, fontWeight: 600, color: '#52525B', textTransform: 'uppercase', letterSpacing: '.08em', padding: '10px 8px 6px', ...style }}>
+    <div className={`hidden px-2 pb-1 pt-3 text-[10px] font-black uppercase tracking-[0.08em] text-[#6b8796] lg:block ${className}`}>
       {children}
     </div>
   )
@@ -45,21 +49,13 @@ function NavItem({ href, label, icon, active }: { href: string; label: string; i
   return (
     <Link
       href={href}
-      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 9, fontSize: 13, color: active ? '#C4B5FD' : '#A1A1AA', background: active ? 'rgba(124,58,237,0.12)' : 'transparent', fontWeight: active ? 500 : 400, textDecoration: 'none', transition: 'all .15s' }}
-      onMouseOver={(event) => {
-        if (!active) {
-          event.currentTarget.style.background = 'rgba(255,255,255,0.05)'
-          event.currentTarget.style.color = '#F4F4F5'
-        }
-      }}
-      onMouseOut={(event) => {
-        if (!active) {
-          event.currentTarget.style.background = 'transparent'
-          event.currentTarget.style.color = '#A1A1AA'
-        }
-      }}
+      className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full px-3 text-sm font-bold transition lg:rounded-lg lg:px-3 ${
+        active
+          ? 'bg-[#e0f7f1] text-[#008772]'
+          : 'bg-[#f7fbfa] text-[#34566c] hover:bg-[#eefaf7] hover:text-[#063052]'
+      }`}
     >
-      <span style={{ fontSize: 12, width: 20, textAlign: 'center', flexShrink: 0, fontWeight: 700 }}>{icon}</span>
+      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-sm">{icon}</span>
       {label}
     </Link>
   )
