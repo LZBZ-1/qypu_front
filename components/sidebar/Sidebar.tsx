@@ -2,20 +2,23 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { ComponentProps } from 'react'
+
+import AppIcon from '@/components/ui/AppIcon'
 
 const NAV = [
-  { href: '/dashboard', label: 'Dashboard', icon: 'D' },
-  { href: '/ventas', label: 'Ventas', icon: 'V' },
-  { href: '/compras', label: 'Compras', icon: 'C' },
-  { href: '/inventario', label: 'Inventario', icon: 'I' },
-  { href: '/caja', label: 'Caja', icon: 'J' },
-  { href: '/reportes', label: 'Reportes', icon: 'R' },
-]
+  { href: '/dashboard', label: 'Dashboard', icon: 'bar-chart' },
+  { href: '/ventas', label: 'Ventas', icon: 'receipt' },
+  { href: '/compras', label: 'Compras', icon: 'shopping-bag' },
+  { href: '/inventario', label: 'Inventario', icon: 'package' },
+  { href: '/caja', label: 'Caja', icon: 'wallet' },
+  { href: '/reportes', label: 'Reportes', icon: 'chart' },
+] as const
 
 const NAV_CONFIG = [
-  { href: '/configuracion', label: 'Mi negocio', icon: 'M' },
-  { href: '/canales', label: 'Canales', icon: 'T' },
-]
+  { href: '/configuracion', label: 'Mi negocio', icon: 'building' },
+  { href: '/canales', label: 'Canales', icon: 'bot' },
+] as const
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -45,7 +48,7 @@ function SectionLabel({ children, className = '' }: { children: React.ReactNode;
   )
 }
 
-function NavItem({ href, label, icon, active }: { href: string; label: string; icon: string; active: boolean }) {
+function NavItem({ href, label, icon, active }: { href: string; label: string; icon: ComponentProps<typeof AppIcon>['name']; active: boolean }) {
   return (
     <Link
       href={href}
@@ -55,7 +58,9 @@ function NavItem({ href, label, icon, active }: { href: string; label: string; i
           : 'bg-[#f7fbfa] text-[#34566c] hover:bg-[#eefaf7] hover:text-[#063052]'
       }`}
     >
-      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-sm">{icon}</span>
+      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-sm">
+        <AppIcon name={icon} size={15} />
+      </span>
       {label}
     </Link>
   )

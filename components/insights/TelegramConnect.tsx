@@ -56,9 +56,9 @@ export default function TelegramConnect() {
           borderRadius: 20,
           fontSize: 12,
           fontWeight: 500,
-          border: `1px solid ${connected ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.12)'}`,
-          background: 'rgba(255,255,255,0.04)',
-          color: '#F4F4F5',
+          border: `1px solid ${connected ? 'rgba(16,185,129,0.3)' : '#CFE9E3'}`,
+          background: '#FFFFFF',
+          color: '#063052',
           cursor: 'pointer',
         }}
       >
@@ -71,25 +71,25 @@ export default function TelegramConnect() {
           onClick={(event) => {
             if (event.target === event.currentTarget) setOpen(false)
           }}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(6,35,66,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
         >
-          <div style={{ background: '#1C1C21', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 16, width: 440, maxWidth: 'calc(100vw - 32px)', padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 16, width: 440, maxWidth: 'calc(100vw - 32px)', padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 17, fontWeight: 800 }}>Telegram real</span>
               <button
                 onClick={() => setOpen(false)}
-                style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid rgba(255,255,255,0.12)', background: 'transparent', color: '#A1A1AA', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid #CFE9E3', background: '#FFFFFF', color: '#587487', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 x
               </button>
             </div>
 
             {loading ? (
-              <div style={{ fontSize: 13, color: '#A1A1AA' }}>Cargando canal real...</div>
+              <div style={{ fontSize: 13, color: '#587487' }}>Cargando canal...</div>
             ) : (
               <>
-                <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.6 }}>
-                  Esta vista lee el canal Telegram real desde la tabla `channels` de tu proyecto.
+                <p style={{ fontSize: 13, color: '#587487', lineHeight: 1.6 }}>
+                  Revisa el estado de Telegram y usa el enlace para completar la vinculacion.
                 </p>
 
                 <Step title="Organizacion" value={data?.organization?.name ?? 'Sin organizacion'} />
@@ -109,8 +109,8 @@ export default function TelegramConnect() {
                   </a>
                 ) : null}
 
-                <div style={{ padding: '12px 14px', background: 'rgba(34,158,217,0.06)', border: '1px solid rgba(34,158,217,0.15)', borderRadius: 10, fontSize: 12, color: '#60C8F5', lineHeight: 1.6 }}>
-                  Si el bot usa el parametro `start`, este boton ya te abre el chat con el codigo precargado para acelerar la vinculacion.
+                <div style={{ padding: '12px 14px', background: 'rgba(34,158,217,0.06)', border: '1px solid rgba(34,158,217,0.15)', borderRadius: 10, fontSize: 12, color: '#0E7490', lineHeight: 1.6 }}>
+                  El boton abre el chat de Telegram con el codigo preparado para acelerar la vinculacion.
                 </div>
               </>
             )}
@@ -125,7 +125,7 @@ function Step({ title, value }: { title: string; value: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <div style={{ fontSize: 12, color: '#71717A', fontWeight: 600 }}>{title}</div>
-      <div style={{ background: '#0A0A0D', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: '#F4F4F5' }}>
+      <div style={{ background: '#F7FBFA', border: '1px solid #CFE9E3', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: '#063052' }}>
         {value}
       </div>
     </div>

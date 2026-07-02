@@ -1,3 +1,4 @@
+import AppIcon from '@/components/ui/AppIcon'
 import { formatCurrency, formatDateTime } from '@/lib/formatters'
 
 type CashMovement = {
@@ -23,11 +24,11 @@ export default function CajaBalance({
   movimientos: CashMovement[]
 }) {
   return (
-    <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 0 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 600 }}>Caja del dia</div>
-          <div style={{ fontSize: 11, color: '#52525B', marginTop: 2 }}>Movimientos reales de Supabase</div>
+          <div style={{ fontSize: 11, color: '#52525B', marginTop: 2 }}>Movimientos registrados</div>
         </div>
         <span
           style={{
@@ -45,22 +46,26 @@ export default function CajaBalance({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#A1A1AA' }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>I</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#587487' }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(16,185,129,0.1)', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>
+              <AppIcon name="plus" size={15} />
+            </div>
             Ingresos
           </div>
           <span style={{ color: '#34D399', fontWeight: 700 }}>{formatCurrency(ingresos)}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#A1A1AA' }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(244,63,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>E</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#587487' }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(244,63,94,0.1)', color: '#E11D48', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>
+              <AppIcon name="minus" size={15} />
+            </div>
             Egresos
           </div>
           <span style={{ color: '#F87171', fontWeight: 700 }}>{formatCurrency(egresos)}</span>
         </div>
       </div>
 
-      <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.07)', margin: '4px 0 14px' }} />
+      <hr style={{ border: 'none', borderTop: '1px solid #DCEFEB', margin: '4px 0 14px' }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
         <div>
@@ -85,10 +90,10 @@ export default function CajaBalance({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {movimientos.slice(0, 4).map((movement) => (
               <div key={movement.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, gap: 12 }}>
-                <span style={{ color: '#A1A1AA' }}>
-                  {formatDateTime(movement.createdAt)} · {movement.concept} · {movement.reference}
+                <span style={{ color: '#587487' }}>
+                  {formatDateTime(movement.createdAt)} - {movement.concept} - {movement.reference}
                 </span>
-                <span style={{ color: movement.type === 'egreso' ? '#F87171' : '#34D399', fontWeight: 600 }}>
+                <span style={{ color: movement.type === 'egreso' ? '#F87171' : '#059669', fontWeight: 600 }}>
                   {movement.type === 'egreso' ? '-' : '+'}
                   {formatCurrency(movement.amount)}
                 </span>
