@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
           : 0,
         highest: compras.reduce((max, movement) => Math.max(max, movement.amount), 0),
       },
-      note: 'El esquema actual no tiene una tabla de compras con proveedor e items. Esta vista muestra egresos de caja existentes.',
+      note: 'Esta vista muestra egresos de caja registrados.',
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'No se pudo cargar compras'

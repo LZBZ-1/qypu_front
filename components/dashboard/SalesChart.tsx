@@ -45,11 +45,11 @@ export default function SalesChart({ points }: { points: SalesPoint[] }) {
           plugins: { legend: { display: false } },
           scales: {
             x: {
-              grid: { color: 'rgba(255,255,255,0.04)' },
+              grid: { color: '#EEF6F4' },
               ticks: { color: '#52525B', font: { size: 11 } },
             },
             y: {
-              grid: { color: 'rgba(255,255,255,0.04)' },
+              grid: { color: '#EEF6F4' },
               ticks: { color: '#52525B', font: { size: 11 }, callback: (value: string | number) => 'S/' + value },
             },
           },
@@ -63,7 +63,7 @@ export default function SalesChart({ points }: { points: SalesPoint[] }) {
   }, [points])
 
   return (
-    <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px' }}>
+    <div style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '18px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 600 }}>Ventas por hora</div>
@@ -77,8 +77,8 @@ export default function SalesChart({ points }: { points: SalesPoint[] }) {
             borderRadius: 20,
             fontSize: 10.5,
             fontWeight: 500,
-            background: points.length ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.08)',
-            color: points.length ? '#34D399' : '#A1A1AA',
+            background: points.length ? 'rgba(16,185,129,0.12)' : '#EEF6F4',
+            color: points.length ? '#059669' : '#587487',
           }}
         >
           {points.length ? 'En vivo' : 'Sin datos'}

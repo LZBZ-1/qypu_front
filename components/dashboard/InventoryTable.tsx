@@ -14,12 +14,12 @@ export default function InventoryTable({
   agotados: number
 }) {
   return (
-    <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px' }}>
+    <div style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '18px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 600 }}>Inventario</div>
           <div style={{ fontSize: 11, color: '#52525B', marginTop: 2 }}>
-            {totalProducts} producto{totalProducts === 1 ? '' : 's'} en el esquema real
+            {totalProducts} producto{totalProducts === 1 ? '' : 's'} registrado{totalProducts === 1 ? '' : 's'}
           </div>
         </div>
         <span
@@ -38,7 +38,7 @@ export default function InventoryTable({
 
       {products.length === 0 ? (
         <div style={{ padding: '24px 0', fontSize: 12.5, color: '#71717A' }}>
-          Aun no hay productos cargados en `products`. Puedes crearlos desde la vista de Inventario.
+          Aun no hay productos cargados. Puedes crearlos desde la vista de Inventario.
         </div>
       ) : (
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
@@ -55,7 +55,7 @@ export default function InventoryTable({
                     textTransform: 'uppercase',
                     letterSpacing: '.05em',
                     paddingBottom: 10,
-                    borderBottom: '1px solid rgba(255,255,255,0.07)',
+                    borderBottom: '1px solid #DCEFEB',
                   }}
                 >
                   {header}
@@ -68,16 +68,16 @@ export default function InventoryTable({
               const isOut = product.quantity === 0
               return (
                 <tr key={product.name}>
-                  <td style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#F4F4F5', fontWeight: 500 }}>
+                  <td style={{ padding: '10px 0', borderBottom: '1px solid #EEF6F4', color: '#063052', fontWeight: 500 }}>
                     {product.name}
                   </td>
-                  <td style={{ padding: '10px 8px 10px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#A1A1AA' }}>
+                  <td style={{ padding: '10px 8px 10px 0', borderBottom: '1px solid #EEF6F4', color: '#587487' }}>
                     {product.categoryName}
                   </td>
-                  <td style={{ padding: '10px 8px 10px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#A1A1AA', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '10px 8px 10px 0', borderBottom: '1px solid #EEF6F4', color: '#587487', whiteSpace: 'nowrap' }}>
                     {product.quantity} uds
                   </td>
-                  <td style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  <td style={{ padding: '10px 0', borderBottom: '1px solid #EEF6F4' }}>
                     <span
                       style={{
                         display: 'inline-flex',

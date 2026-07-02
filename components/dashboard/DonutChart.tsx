@@ -53,7 +53,7 @@ export default function DonutChart({ items }: { items: CategoryPoint[] }) {
   }, [normalizedItems])
 
   return (
-    <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px' }}>
+    <div style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '18px 20px' }}>
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 600 }}>Ventas por categoria</div>
         <div style={{ fontSize: 11, color: '#52525B', marginTop: 2 }}>
@@ -83,7 +83,7 @@ export default function DonutChart({ items }: { items: CategoryPoint[] }) {
                   flexShrink: 0,
                 }}
               />
-              <span style={{ color: '#A1A1AA' }}>{item.label}</span>
+              <span style={{ color: '#587487' }}>{item.label}</span>
             </div>
             <span style={{ fontWeight: 600 }}>{items.length ? `S/ ${item.value.toFixed(2)}` : 'Sin datos'}</span>
           </div>

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export async function POST() {
   return NextResponse.json(
     {
-      text: 'El chat aun no esta conectado al esquema real actual de Supabase. Primero habia sido construido sobre tablas que no existen en este proyecto.',
+      text: 'El chat aun esta en preparacion. Pronto podras centralizar mensajes y consultas desde tus canales conectados.',
       intent: 'OTRO',
       data: null,
       actions: [],

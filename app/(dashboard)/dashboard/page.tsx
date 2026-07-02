@@ -1,3 +1,5 @@
+import type { ComponentProps } from 'react'
+
 import CajaBalance from '@/components/dashboard/CajaBalance'
 import DonutChart from '@/components/dashboard/DonutChart'
 import InventoryTable from '@/components/dashboard/InventoryTable'
@@ -16,30 +18,30 @@ export default async function DashboardPage() {
 
   const organizationName = inventory.context?.organization?.name ?? 'Sin organizacion'
   const branchName = inventory.context?.branch?.name ?? 'Sin sucursal'
-  const kpis = [
+  const kpis: ComponentProps<typeof KpiGrid>['items'] = [
     {
-      icon: '$',
+      icon: 'banknote',
       label: 'Ventas del dia',
       value: formatCurrency(sales.summary.total),
       delta: sales.summary.count ? `${sales.summary.count} transaccion(es)` : 'Sin ventas registradas',
       deltaType: sales.summary.count ? ('up' as const) : ('warn' as const),
     },
     {
-      icon: 'E',
+      icon: 'shopping-bag',
       label: 'Egresos del dia',
       value: formatCurrency(cash.egresos),
       delta: cash.egresos ? 'Con movimientos registrados' : 'Sin egresos registrados',
       deltaType: cash.egresos ? ('down' as const) : ('warn' as const),
     },
     {
-      icon: 'C',
+      icon: 'wallet',
       label: 'Balance caja',
       value: formatCurrency(cash.balance),
       delta: cash.balance >= 0 ? 'Balance positivo' : 'Balance negativo',
       deltaType: cash.balance >= 0 ? ('up' as const) : ('down' as const),
     },
     {
-      icon: 'P',
+      icon: 'package',
       label: 'Productos',
       value: String(inventory.summary.totalProducts),
       delta: inventory.summary.agotados
@@ -55,20 +57,20 @@ export default async function DashboardPage() {
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em' }}>Dashboard</h1>
           <p style={{ fontSize: 12, color: '#52525B', marginTop: 3 }}>
-            {organizationName} · {branchName}
+            {organizationName} - {branchName}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
-          {['Hoy', 'Real', 'Supabase'].map((chip, index) => (
+          {['Hoy', 'Semana', 'Mes'].map((chip, index) => (
             <button
               key={chip}
               style={{
                 padding: '5px 12px',
                 borderRadius: 20,
                 fontSize: 11.5,
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: index === 0 ? '#7C3AED' : 'transparent',
-                color: index === 0 ? '#fff' : '#A1A1AA',
+                border: '1px solid #CFE9E3',
+                background: index === 0 ? '#008772' : '#FFFFFF',
+                color: index === 0 ? '#FFFFFF' : '#34566C',
                 cursor: 'pointer',
               }}
             >

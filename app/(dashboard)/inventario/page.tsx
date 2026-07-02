@@ -130,18 +130,18 @@ export default function InventarioPage() {
             {data.summary.totalProducts} producto(s) en {data.context?.branch?.name ?? 'sin sucursal'}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8, fontSize: 12, color: '#A1A1AA', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, fontSize: 12, color: '#587487', alignItems: 'center' }}>
           <span style={{ color: '#34D399' }}>{data.summary.totalUnits} unidades</span>
           <span style={{ color: '#52525B' }}>·</span>
           <span style={{ color: '#FB7185' }}>{data.summary.agotados} agotado(s)</span>
         </div>
       </div>
 
-      <div style={{ background: 'rgba(34,158,217,0.07)', border: '1px solid rgba(34,158,217,0.2)', borderRadius: 10, padding: '10px 14px', fontSize: 12, color: '#60C8F5' }}>
-        El esquema actual usa `products`, `product_stocks` y `categories`. Por ahora no existe `stock_minimo`, asi que el estado se basa en disponibilidad real.
+      <div style={{ background: 'rgba(34,158,217,0.07)', border: '1px solid rgba(34,158,217,0.2)', borderRadius: 10, padding: '10px 14px', fontSize: 12, color: '#0E7490' }}>
+        El estado de cada producto se calcula con la disponibilidad registrada en inventario.
       </div>
 
-      <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', gap: 10 }}>
+      <div style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '18px 20px', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', gap: 10 }}>
         <input
           value={form.name}
           onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
@@ -209,9 +209,9 @@ export default function InventarioPage() {
                 padding: '6px 12px',
                 borderRadius: 20,
                 fontSize: 11.5,
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: categoria === item ? 'rgba(124,58,237,0.2)' : 'transparent',
-                color: categoria === item ? '#C4B5FD' : '#A1A1AA',
+                border: '1px solid #CFE9E3',
+                background: categoria === item ? '#E0F7F1' : '#FFFFFF',
+                color: categoria === item ? '#008772' : '#34566C',
                 cursor: 'pointer',
               }}
             >
@@ -221,11 +221,11 @@ export default function InventarioPage() {
         </div>
       </div>
 
-      <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px' }}>
+      <div style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '18px 20px' }}>
         {loading ? (
-          <div style={{ fontSize: 13, color: '#A1A1AA' }}>Cargando inventario real...</div>
+          <div style={{ fontSize: 13, color: '#587487' }}>Cargando inventario...</div>
         ) : filtrados.length === 0 ? (
-          <div style={{ fontSize: 13, color: '#A1A1AA' }}>
+          <div style={{ fontSize: 13, color: '#587487' }}>
             No hay productos que coincidan. Si la base sigue vacia, crea el primero arriba.
           </div>
         ) : (
@@ -233,7 +233,7 @@ export default function InventarioPage() {
             <thead>
               <tr>
                 {['Producto', 'Categoria', 'Stock', 'P. Venta', 'Actualizado', 'Estado'].map((header) => (
-                  <th key={header} style={{ textAlign: 'left', fontSize: 10.5, color: '#52525B', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.05em', paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.07)', paddingRight: 12 }}>
+                  <th key={header} style={{ textAlign: 'left', fontSize: 10.5, color: '#52525B', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '.05em', paddingBottom: 12, borderBottom: '1px solid #DCEFEB', paddingRight: 12 }}>
                     {header}
                   </th>
                 ))}
@@ -244,14 +244,14 @@ export default function InventarioPage() {
                 const status = getStatus(item.quantity)
                 return (
                   <tr key={item.productId}>
-                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#F4F4F5', fontWeight: 500 }}>{item.name}</td>
-                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#A1A1AA', fontSize: 12 }}>{item.categoryName}</td>
-                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', fontWeight: 700, color: item.quantity === 0 ? '#F87171' : '#F4F4F5' }}>{item.quantity}</td>
-                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#34D399' }}>{formatCurrency(item.unitPrice)}</td>
-                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#71717A' }}>
+                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid #EEF6F4', color: '#063052', fontWeight: 500 }}>{item.name}</td>
+                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid #EEF6F4', color: '#587487', fontSize: 12 }}>{item.categoryName}</td>
+                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid #EEF6F4', fontWeight: 700, color: item.quantity === 0 ? '#F87171' : '#063052' }}>{item.quantity}</td>
+                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid #EEF6F4', color: '#059669' }}>{formatCurrency(item.unitPrice)}</td>
+                    <td style={{ padding: '11px 12px 11px 0', borderBottom: '1px solid #EEF6F4', color: '#71717A' }}>
                       {item.updatedAt ? formatDateTime(item.updatedAt) : 'Sin stock'}
                     </td>
-                    <td style={{ padding: '11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td style={{ padding: '11px 0', borderBottom: '1px solid #EEF6F4' }}>
                       <span style={{ display: 'inline-flex', padding: '2px 8px', borderRadius: 20, fontSize: 10, fontWeight: 600, background: status.bg, color: status.color }}>
                         {status.label}
                       </span>
@@ -268,12 +268,12 @@ export default function InventarioPage() {
 }
 
 const inputStyle: React.CSSProperties = {
-  background: '#0A0A0D',
-  border: '1px solid rgba(255,255,255,0.1)',
+  background: '#FFFFFF',
+  border: '1px solid #CFE9E3',
   borderRadius: 8,
   padding: '9px 12px',
   fontSize: 13,
-  color: '#F4F4F5',
+  color: '#063052',
   fontFamily: 'inherit',
   outline: 'none',
   width: '100%',

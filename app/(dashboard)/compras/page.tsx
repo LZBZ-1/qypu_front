@@ -9,7 +9,7 @@ export default async function ComprasPage() {
 
   const resumen = [
     { label: 'Total egresos', value: formatCurrency(total), color: '#F87171' },
-    { label: 'N° egresos', value: String(compras.length), color: '#F4F4F5' },
+    { label: 'Egresos', value: String(compras.length), color: '#063052' },
     { label: 'Promedio', value: formatCurrency(compras.length ? total / compras.length : 0), color: '#A78BFA' },
     { label: 'Mayor egreso', value: formatCurrency(compras.reduce((max, movement) => Math.max(max, movement.amount), 0)), color: '#FCD34D' },
   ]
@@ -23,13 +23,13 @@ export default async function ComprasPage() {
         </div>
       </div>
 
-      <div style={{ padding: '12px 14px', background: 'rgba(34,158,217,0.07)', border: '1px solid rgba(34,158,217,0.15)', borderRadius: 10, fontSize: 12, color: '#60C8F5', lineHeight: 1.6 }}>
-        El esquema actual no tiene una tabla `compras` con proveedor e items. Esta vista usa egresos reales de `financial_transaction_movements`.
+      <div style={{ padding: '12px 14px', background: 'rgba(34,158,217,0.07)', border: '1px solid rgba(34,158,217,0.15)', borderRadius: 10, fontSize: 12, color: '#0E7490', lineHeight: 1.6 }}>
+        Esta vista resume los egresos registrados para ayudarte a revisar compras y salidas de caja.
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
         {resumen.map((item) => (
-          <div key={item.label} style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 16px' }}>
+          <div key={item.label} style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '14px 16px' }}>
             <div style={{ fontSize: 11, color: '#52525B', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6 }}>{item.label}</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: item.color }}>{item.value}</div>
           </div>
@@ -38,16 +38,16 @@ export default async function ComprasPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {compras.length === 0 ? (
-          <div style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px', fontSize: 13, color: '#A1A1AA' }}>
-            Todavia no hay egresos en `financial_transaction_movements`.
+          <div style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '18px 20px', fontSize: 13, color: '#587487' }}>
+            Todavia no hay egresos registrados.
           </div>
         ) : (
           compras.map((item) => (
-            <div key={item.id} style={{ background: '#18181B', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(244,63,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>E</div>
+            <div key={item.id} style={{ background: '#FFFFFF', border: '1px solid #DCEFEB', borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(244,63,94,0.1)', color: '#E11D48', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>-</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{item.concept}</div>
-                <div style={{ fontSize: 12, color: '#A1A1AA', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 12, color: '#587487', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   Referencia {item.reference}
                 </div>
               </div>

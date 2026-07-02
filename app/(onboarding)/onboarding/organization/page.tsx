@@ -173,7 +173,7 @@ export default function OrganizationOnboardingPage() {
             {error ? <Alert>{error}</Alert> : null}
 
             {loading && !options ? (
-              <div style={{ color: '#A1A1AA', fontSize: 13 }}>Cargando catalogos de ubicacion...</div>
+              <div style={{ color: '#587487', fontSize: 13 }}>Cargando catalogos de ubicacion...</div>
             ) : (
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18 }}>
@@ -237,7 +237,7 @@ export default function OrganizationOnboardingPage() {
                 </div>
 
                 <div style={noteStyle}>
-                  La tabla `branches` exige ubicacion completa, por eso este paso guarda departamento, provincia y distrito desde tus catalogos reales de Supabase.
+                  Completa departamento, provincia y distrito para registrar correctamente tu sucursal.
                 </div>
 
                 <button onClick={handleSubmit} disabled={saving || loading} style={primaryButtonStyle(saving || loading)}>

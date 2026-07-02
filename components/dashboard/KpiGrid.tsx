@@ -1,5 +1,9 @@
+import type { ComponentProps } from 'react'
+
+import AppIcon from '@/components/ui/AppIcon'
+
 interface KpiItem {
-  icon: string
+  icon: ComponentProps<typeof AppIcon>['name']
   label: string
   value: string
   delta: string
@@ -19,8 +23,8 @@ export default function KpiGrid({ items }: { items: KpiItem[] }) {
         <div
           key={item.label}
           style={{
-            background: '#18181B',
-            border: '1px solid rgba(255,255,255,0.07)',
+            background: '#FFFFFF',
+            border: '1px solid #DCEFEB',
             borderRadius: 12,
             padding: '16px 18px',
             display: 'flex',
@@ -28,7 +32,9 @@ export default function KpiGrid({ items }: { items: KpiItem[] }) {
             gap: 6,
           }}
         >
-          <span style={{ fontSize: 18 }}>{item.icon}</span>
+          <span style={{ width: 34, height: 34, borderRadius: 10, background: '#EAF8F4', color: '#008772', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <AppIcon name={item.icon} size={18} />
+          </span>
           <span
             style={{
               fontSize: 11,
