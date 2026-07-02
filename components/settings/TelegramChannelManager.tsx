@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 type TelegramResponse = {
   organization: {
@@ -50,10 +50,6 @@ export default function TelegramChannelManager({
       setRefreshing(false)
     }
   }, [])
-
-  useEffect(() => {
-    setData(initialData)
-  }, [initialData])
 
   async function regenerateCode() {
     setLoading(true)
