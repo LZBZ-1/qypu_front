@@ -4,6 +4,23 @@ import { useEffect, useState } from 'react'
 
 import { Product } from '@/types/inventory'
 
+type InventoryItemResponse = {
+  productId: string
+  name: string
+  quantity: number
+  unitPrice: number
+  updatedAt: string | null
+}
+
+type InventoryResponse = {
+  context?: {
+    organization?: {
+      id: string
+    } | null
+  } | null
+  items?: InventoryItemResponse[]
+}
+
 export function useInventory() {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -14,9 +31,9 @@ export function useInventory() {
 
       try {
         const response = await fetch('/api/inventario')
-        const payload = await response.json()
+        const payload = (await response.json()) as InventoryResponse
         setProducts(
-          (payload.items ?? []).map((item: any) => ({
+          (payload.items ?? []).map((item) => ({
             id: item.productId,
             negocio_id: payload.context?.organization?.id ?? '',
             nombre: item.name,

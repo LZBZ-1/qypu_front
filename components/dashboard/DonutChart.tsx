@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import type { Chart } from 'chart.js'
 
 type CategoryPoint = {
   label: string
@@ -11,8 +12,11 @@ const palette = ['#7C3AED', '#10B981', '#F59E0B', '#F43F5E', '#38BDF8', '#FACC15
 
 export default function DonutChart({ items }: { items: CategoryPoint[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const chartRef = useRef<any>(null)
-  const normalizedItems = items.length ? items : [{ label: 'Sin ventas', value: 1 }]
+  const chartRef = useRef<Chart<'doughnut'> | null>(null)
+  const normalizedItems = useMemo(
+    () => (items.length ? items : [{ label: 'Sin ventas', value: 1 }]),
+    [items]
+  )
   const total = items.reduce((sum, item) => sum + item.value, 0)
 
   useEffect(() => {

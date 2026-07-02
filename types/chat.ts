@@ -10,6 +10,6 @@ export interface Message {
 export interface ChatResponse {
   text: string
   intent: 'VENTA' | 'COMPRA' | 'CONSULTA' | 'INVENTARIO' | 'OTRO'
-  data?: any
+  data?: unknown
   actions?: { id: string; label: string }[]
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import type { Chart } from 'chart.js'
 
 type SalesPoint = {
   label: string
@@ -9,7 +10,7 @@ type SalesPoint = {
 
 export default function SalesChart({ points }: { points: SalesPoint[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const chartRef = useRef<any>(null)
+  const chartRef = useRef<Chart<'bar'> | null>(null)
 
   useEffect(() => {
     import('chart.js/auto').then((mod) => {
@@ -49,7 +50,7 @@ export default function SalesChart({ points }: { points: SalesPoint[] }) {
             },
             y: {
               grid: { color: 'rgba(255,255,255,0.04)' },
-              ticks: { color: '#52525B', font: { size: 11 }, callback: (value: any) => 'S/' + value },
+              ticks: { color: '#52525B', font: { size: 11 }, callback: (value: string | number) => 'S/' + value },
             },
           },
         },

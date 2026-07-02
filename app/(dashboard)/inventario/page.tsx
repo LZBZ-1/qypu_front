@@ -70,7 +70,11 @@ export default function InventarioPage() {
   }
 
   useEffect(() => {
-    loadInventory()
+    const timeoutId = window.setTimeout(() => {
+      void loadInventory()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
   }, [])
 
   async function handleCreateProduct() {

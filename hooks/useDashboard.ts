@@ -1,14 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { insightsService } from '@/services/insightsService'
 import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime'
 
+type StockAlert = {
+  productId: string
+  name: string
+  quantity: number
+}
+
 export function useDashboard() {
   const [todaySales, setTodaySales] = useState({ total: 0, count: 0 })
   const [topProducts, setTopProducts] = useState<{ id: string; name: string; qty: number }[]>([])
-  const [stockAlerts, setStockAlerts] = useState<any[]>([])
+  const [stockAlerts, setStockAlerts] = useState<StockAlert[]>([])
   const [aiInsight, setAiInsight] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -40,8 +46,12 @@ export function useDashboard() {
     loadData()
   }, [])
 
-  useSupabaseRealtime('sales', () => setIsLoading(false))
-  useSupabaseRealtime('product_stocks', () => setIsLoading(false))
+  const handleRealtimeChange = useCallback(() => {
+    setIsLoading(false)
+  }, [])
+
+  useSupabaseRealtime('sales', handleRealtimeChange)
+  useSupabaseRealtime('product_stocks', handleRealtimeChange)
 
   return { todaySales, topProducts, stockAlerts, aiInsight, isLoading }
 }
