@@ -30,6 +30,8 @@ type Sale = {
   client_id: string | null
   issue_date: string
   status: string | null
+  total_amount: number | string | null
+  created_at: string | null
 }
 
 type SaleDetail = {
@@ -38,6 +40,13 @@ type SaleDetail = {
   product_id: string
   quantity: number
   unit_price: number | string
+}
+
+type Client = {
+  id: string
+  name: string
+  email: string
+  phone_number: string
 }
 
 type FinancialTransaction = {
@@ -80,6 +89,12 @@ export type SaleListItem = {
   createdAt: string
   status: string
   total: number
+  client: {
+    id: string
+    name: string
+    email: string
+    phoneNumber: string
+  } | null
   items: Array<{
     productId: string
     productName: string
@@ -96,6 +111,20 @@ export type CashMovement = {
   amount: number
   concept: string
   reference: string
+}
+
+export type CreateSaleInput = {
+  issueDate?: string
+  client: {
+    name: string
+    email?: string
+    phoneNumber?: string
+  }
+  items: Array<{
+    productId: string
+    quantity: number
+    unitPrice: number
+  }>
 }
 
 function toNumber(value: number | string | null | undefined): number {
@@ -116,6 +145,11 @@ function startOfToday(): Date {
 
 function shortId(id: string): string {
   return id.slice(0, 8).toUpperCase()
+}
+
+function normalizeMovementType(type: string): 'ingreso' | 'egreso' {
+  if (type === 'out' || type === 'egreso') return 'egreso'
+  return 'ingreso'
 }
 
 export async function getAppContext(): Promise<AppContext | null> {
@@ -225,11 +259,16 @@ export async function createInventoryItem(input: {
     throw new Error('No branch available for inventory creation')
   }
 
+  if (!input.categoryId) {
+    throw new Error('Selecciona o crea una categoria para el producto')
+  }
+
   const { data: product, error: productError } = await supabaseAdmin
     .from('products')
     .insert({
+      id: crypto.randomUUID(),
       organization_id: context.organization.id,
-      category_id: input.categoryId ?? null,
+      category_id: input.categoryId,
       name: input.name.trim(),
       unit_price: input.unitPrice ?? 0,
     })
@@ -249,6 +288,175 @@ export async function createInventoryItem(input: {
   if (stockError) throw stockError
 
   return product
+}
+
+export async function createCategory(input: { name: string }) {
+  const context = await getAppContext()
+  const name = input.name.trim()
+
+  if (!context?.organization) {
+    throw new Error('No hay una organizacion disponible para crear categorias')
+  }
+
+  if (!name) {
+    throw new Error('El nombre de la categoria es obligatorio')
+  }
+
+  const { data: existingCategory, error: existingCategoryError } = await supabaseAdmin
+    .from('categories')
+    .select('*')
+    .eq('organization_id', context.organization.id)
+    .ilike('name', name)
+    .maybeSingle<Category>()
+
+  if (existingCategoryError) throw existingCategoryError
+  if (existingCategory) return existingCategory
+
+  const { data: category, error: categoryError } = await supabaseAdmin
+    .from('categories')
+    .insert({
+      id: crypto.randomUUID(),
+      organization_id: context.organization.id,
+      name,
+    })
+    .select('*')
+    .single<Category>()
+
+  if (categoryError) throw categoryError
+
+  return category
+}
+
+export async function updateCategory(input: { id: string; name: string }) {
+  const context = await getAppContext()
+  const name = input.name.trim()
+
+  if (!context?.organization) {
+    throw new Error('No hay una organizacion disponible para actualizar categorias')
+  }
+
+  if (!input.id || !name) {
+    throw new Error('La categoria y el nombre son obligatorios')
+  }
+
+  const { data: category, error: categoryError } = await supabaseAdmin
+    .from('categories')
+    .update({ name })
+    .eq('id', input.id)
+    .eq('organization_id', context.organization.id)
+    .select('*')
+    .single<Category>()
+
+  if (categoryError) throw categoryError
+
+  return category
+}
+
+export async function deleteCategory(input: { id: string }) {
+  const context = await getAppContext()
+
+  if (!context?.organization) {
+    throw new Error('No hay una organizacion disponible para eliminar categorias')
+  }
+
+  const productsResult = await supabaseAdmin
+    .from('products')
+    .select('id', { count: 'exact', head: true })
+    .eq('organization_id', context.organization.id)
+    .eq('category_id', input.id)
+
+  if (productsResult.error) throw productsResult.error
+
+  if ((productsResult.count ?? 0) > 0) {
+    throw new Error('No se puede eliminar una categoria con productos asociados')
+  }
+
+  const { error: categoryError } = await supabaseAdmin
+    .from('categories')
+    .delete()
+    .eq('id', input.id)
+    .eq('organization_id', context.organization.id)
+
+  if (categoryError) throw categoryError
+}
+
+export async function updateInventoryItem(input: {
+  productId: string
+  name: string
+  categoryId: string
+  unitPrice: number
+  quantity: number
+}) {
+  const context = await getAppContext()
+
+  if (!context?.branch || !context.organization) {
+    throw new Error('No branch available for inventory update')
+  }
+
+  if (!input.productId || !input.name.trim() || !input.categoryId) {
+    throw new Error('Producto, nombre y categoria son obligatorios')
+  }
+
+  const { error: productError } = await supabaseAdmin
+    .from('products')
+    .update({
+      category_id: input.categoryId,
+      name: input.name.trim(),
+      unit_price: input.unitPrice,
+    })
+    .eq('id', input.productId)
+    .eq('organization_id', context.organization.id)
+
+  if (productError) throw productError
+
+  const { error: stockError } = await supabaseAdmin
+    .from('product_stocks')
+    .upsert(
+      {
+        product_id: input.productId,
+        branch_id: context.branch.id,
+        quantity: input.quantity,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'product_id,branch_id' }
+    )
+
+  if (stockError) throw stockError
+}
+
+export async function deleteInventoryItem(input: { productId: string }) {
+  const context = await getAppContext()
+
+  if (!context?.branch || !context.organization) {
+    throw new Error('No branch available for inventory deletion')
+  }
+
+  const saleDetailsResult = await supabaseAdmin
+    .from('sale_details')
+    .select('id', { count: 'exact', head: true })
+    .eq('product_id', input.productId)
+
+  if (saleDetailsResult.error) throw saleDetailsResult.error
+
+  if ((saleDetailsResult.count ?? 0) > 0) {
+    throw new Error('No se puede eliminar un producto que ya fue usado en ventas')
+  }
+
+  const { error: stockError } = await supabaseAdmin
+    .from('product_stocks')
+    .delete()
+    .eq('product_id', input.productId)
+    .eq('branch_id', context.branch.id)
+
+  if (stockError) throw stockError
+
+  const { error: productError } = await supabaseAdmin
+    .from('products')
+    .delete()
+    .eq('id', input.productId)
+    .eq('organization_id', context.organization.id)
+
+  if (productError) throw productError
 }
 
 export async function getSalesOverview(options?: { from?: string; to?: string }) {
@@ -321,6 +529,14 @@ export async function getSalesOverview(options?: { from?: string; to?: string })
   const categories = context.categories
   const productMap = new Map((productsResult.data ?? []).map((product) => [product.id, product]))
   const categoryMap = new Map(categories.map((category) => [category.id, category.name]))
+  const clientIds = [...new Set((sales ?? []).map((sale) => sale.client_id).filter((id): id is string => Boolean(id)))]
+  const clientsResult = clientIds.length
+    ? await supabaseAdmin.from('clients').select('*').in('id', clientIds).returns<Client[]>()
+    : { data: [], error: null as null }
+
+  if (clientsResult.error) throw clientsResult.error
+
+  const clientMap = new Map((clientsResult.data ?? []).map((client) => [client.id, client]))
   const detailsBySaleId = new Map<string, SaleDetail[]>()
   const transactionsBySaleId = new Map<string, FinancialTransaction>()
   const movementsByTransactionId = new Map<string, FinancialMovement[]>()
@@ -352,10 +568,12 @@ export async function getSalesOverview(options?: { from?: string; to?: string })
     const transaction = transactionsBySaleId.get(sale.id)
     const movements = transaction ? movementsByTransactionId.get(transaction.id) ?? [] : []
     const createdAt =
+      sale.created_at ??
       movements
         .map((movement) => movement.created_at)
         .sort()
-        .at(-1) ?? `${sale.issue_date}T00:00:00.000Z`
+        .at(-1) ??
+      `${sale.issue_date}T00:00:00.000Z`
 
     const items = details.map((detail) => {
       const product = productMap.get(detail.product_id)
@@ -382,9 +600,11 @@ export async function getSalesOverview(options?: { from?: string; to?: string })
       }
     })
 
-    const total = items.reduce((sum, item) => sum + item.subtotal, 0)
+    const detailTotal = items.reduce((sum, item) => sum + item.subtotal, 0)
+    const total = toNumber(sale.total_amount) || detailTotal
     const hourLabel = new Date(createdAt).getHours().toString().padStart(2, '0') + ':00'
     hourTotals.set(hourLabel, (hourTotals.get(hourLabel) ?? 0) + total)
+    const client = sale.client_id ? clientMap.get(sale.client_id) ?? null : null
 
     return {
       id: sale.id,
@@ -392,6 +612,14 @@ export async function getSalesOverview(options?: { from?: string; to?: string })
       createdAt,
       status: sale.status ?? 'sin_estado',
       total,
+      client: client
+        ? {
+            id: client.id,
+            name: client.name,
+            email: client.email,
+            phoneNumber: client.phone_number,
+          }
+        : null,
       items,
     }
   })
@@ -417,6 +645,174 @@ export async function getSalesOverview(options?: { from?: string; to?: string })
       .sort((a, b) => b[1].income - a[1].income)
       .map(([name, value]) => ({ name, quantity: value.quantity, income: value.income })),
   }
+}
+
+export async function createSale(input: CreateSaleInput) {
+  const context = await getAppContext()
+
+  if (!context?.branch || !context.organization || !context.user) {
+    throw new Error('No hay una sucursal activa para registrar la venta')
+  }
+
+  const clientName = input.client.name.trim()
+  if (!clientName) {
+    throw new Error('El cliente es obligatorio')
+  }
+
+  const normalizedItems = input.items.map((item) => ({
+    productId: item.productId,
+    quantity: Math.trunc(Number(item.quantity)),
+    unitPrice: Number(item.unitPrice),
+  }))
+
+  if (normalizedItems.length === 0) {
+    throw new Error('Agrega al menos un producto a la venta')
+  }
+
+  if (normalizedItems.some((item) => !item.productId || item.quantity <= 0 || item.unitPrice < 0)) {
+    throw new Error('Cada producto debe tener cantidad positiva y precio valido')
+  }
+
+  const productIds = [...new Set(normalizedItems.map((item) => item.productId))]
+  const [productsResult, stocksResult] = await Promise.all([
+    supabaseAdmin
+      .from('products')
+      .select('*')
+      .eq('organization_id', context.organization.id)
+      .in('id', productIds)
+      .returns<Product[]>(),
+    supabaseAdmin
+      .from('product_stocks')
+      .select('*')
+      .eq('branch_id', context.branch.id)
+      .in('product_id', productIds)
+      .returns<ProductStock[]>(),
+  ])
+
+  if (productsResult.error) throw productsResult.error
+  if (stocksResult.error) throw stocksResult.error
+
+  const productMap = new Map((productsResult.data ?? []).map((product) => [product.id, product]))
+  const stockMap = new Map((stocksResult.data ?? []).map((stock) => [stock.product_id, stock]))
+
+  for (const item of normalizedItems) {
+    const product = productMap.get(item.productId)
+    if (!product) {
+      throw new Error('Uno de los productos no pertenece a tu negocio')
+    }
+
+    const stock = stockMap.get(item.productId)
+    if (!stock || stock.quantity < item.quantity) {
+      throw new Error(`Stock insuficiente para ${product.name}`)
+    }
+  }
+
+  const saleId = crypto.randomUUID()
+  const totalAmount = normalizedItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
+  const phoneNumber = input.client.phoneNumber?.trim() || 'Sin telefono'
+  const email = input.client.email?.trim() || `${saleId}@qypu.local`
+
+  let client: Client | null = null
+  if (input.client.phoneNumber?.trim()) {
+    const existingClientResult = await supabaseAdmin
+      .from('clients')
+      .select('*')
+      .eq('phone_number', input.client.phoneNumber.trim())
+      .limit(1)
+      .maybeSingle<Client>()
+
+    if (existingClientResult.error) throw existingClientResult.error
+    client = existingClientResult.data ?? null
+  }
+
+  if (!client) {
+    const { data: newClient, error: clientError } = await supabaseAdmin
+      .from('clients')
+      .insert({
+        id: crypto.randomUUID(),
+        name: clientName,
+        email,
+        phone_number: phoneNumber,
+      })
+      .select('*')
+      .single<Client>()
+
+    if (clientError) throw clientError
+    client = newClient
+  }
+
+  const { error: saleError } = await supabaseAdmin.from('sales').insert({
+    id: saleId,
+    client_id: client.id,
+    branch_id: context.branch.id,
+    issue_date: input.issueDate || toIsoDate(new Date()),
+    status: 'valid',
+    total_amount: totalAmount,
+  })
+
+  if (saleError) throw saleError
+
+  const saleDetails = normalizedItems.map((item) => ({
+    id: crypto.randomUUID(),
+    sale_id: saleId,
+    product_id: item.productId,
+    quantity: item.quantity,
+    unit_price: item.unitPrice,
+  }))
+
+  const { error: detailError } = await supabaseAdmin.from('sale_details').insert(saleDetails)
+  if (detailError) {
+    await supabaseAdmin.from('sales').delete().eq('id', saleId)
+    throw detailError
+  }
+
+  try {
+    for (const item of normalizedItems) {
+      const stock = stockMap.get(item.productId)
+      if (!stock) throw new Error('No se encontro stock para descontar')
+
+      const { data: updatedStock, error: stockError } = await supabaseAdmin
+        .from('product_stocks')
+        .update({
+          quantity: stock.quantity - item.quantity,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', stock.id)
+        .eq('quantity', stock.quantity)
+        .gte('quantity', item.quantity)
+        .select('id')
+        .maybeSingle<{ id: string }>()
+
+      if (stockError) throw stockError
+      if (!updatedStock) {
+        throw new Error(`El stock de ${productMap.get(item.productId)?.name ?? 'un producto'} cambio. Revisa e intenta de nuevo.`)
+      }
+    }
+  } catch (stockUpdateError) {
+    await supabaseAdmin.from('sale_details').delete().eq('sale_id', saleId)
+    await supabaseAdmin.from('sales').delete().eq('id', saleId)
+    throw stockUpdateError
+  }
+
+  const { data: transaction, error: transactionError } = await supabaseAdmin
+    .from('financial_transactions')
+    .insert({ id: crypto.randomUUID(), sale_id: saleId })
+    .select('*')
+    .single<FinancialTransaction>()
+
+  if (transactionError) throw transactionError
+
+  const { error: movementError } = await supabaseAdmin.from('financial_transaction_movements').insert({
+    id: crypto.randomUUID(),
+    financial_transaction_id: transaction.id,
+    amount: totalAmount,
+    type: 'in',
+    created_by: context.user.id,
+  })
+
+  if (movementError) throw movementError
+
+  return { saleId }
 }
 
 export async function getCashOverview(options?: { from?: string }) {
@@ -487,7 +883,7 @@ export async function getCashOverview(options?: { from?: string }) {
     .map((movement) => {
       const transaction = transactionById.get(movement.financial_transaction_id)
       const sale = transaction?.sale_id ? saleById.get(transaction.sale_id) : null
-      const type = movement.type || 'ingreso'
+      const type = normalizeMovementType(movement.type)
 
       return {
         id: movement.id,
